@@ -1,0 +1,906 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f7a44">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Spesa REWE">
+<title>La spesa del sabato — Ale + Lisa</title>
+<style>
+:root{
+  --bg:#f4f6f1; --card:#ffffff; --card2:#eef1ea; --ink:#212b1f; --ink2:#5c6857; --line:#dde3d6;
+  --acc:#2f7a44; --acc-ink:#ffffff; --acc-soft:#e3efe4;
+  --ale:#2c6e8f; --ale-soft:#e2eef4; --lisa:#9c4f74; --lisa-soft:#f4e6ed;
+  --warn:#8a6d1f; --warn-soft:#f4ecd4;
+  --deal:#b5541e; --deal-soft:#f6e6da;
+  --awn1:#2f7a44; --awn2:#fdfdfa;
+  --shadow:0 1px 3px rgba(33,43,31,.08);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#141813; --card:#1d231b; --card2:#242b21; --ink:#e6ebe1; --ink2:#9aa691; --line:#333d2f;
+    --acc:#6fbf85; --acc-ink:#10240f; --acc-soft:#25392a;
+    --ale:#7db8d4; --ale-soft:#1e3341; --lisa:#d495b7; --lisa-soft:#3a2530;
+    --warn:#d4b45e; --warn-soft:#37301c;
+    --deal:#e0955e; --deal-soft:#3a281c;
+    --awn1:#3d5f47; --awn2:#242b21;
+    --shadow:0 1px 3px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141813; --card:#1d231b; --card2:#242b21; --ink:#e6ebe1; --ink2:#9aa691; --line:#333d2f;
+  --acc:#6fbf85; --acc-ink:#10240f; --acc-soft:#25392a;
+  --ale:#7db8d4; --ale-soft:#1e3341; --lisa:#d495b7; --lisa-soft:#3a2530;
+  --warn:#d4b45e; --warn-soft:#37301c;
+  --deal:#e0955e; --deal-soft:#3a281c;
+  --awn1:#3d5f47; --awn2:#242b21;
+  --shadow:0 1px 3px rgba(0,0,0,.4);
+}
+:root[data-theme="light"]{
+  --bg:#f4f6f1; --card:#ffffff; --card2:#eef1ea; --ink:#212b1f; --ink2:#5c6857; --line:#dde3d6;
+  --acc:#2f7a44; --acc-ink:#ffffff; --acc-soft:#e3efe4;
+  --ale:#2c6e8f; --ale-soft:#e2eef4; --lisa:#9c4f74; --lisa-soft:#f4e6ed;
+  --warn:#8a6d1f; --warn-soft:#f4ecd4;
+  --deal:#b5541e; --deal-soft:#f6e6da;
+  --awn1:#2f7a44; --awn2:#fdfdfa;
+  --shadow:0 1px 3px rgba(33,43,31,.08);
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif;margin:0;line-height:1.45;-webkit-text-size-adjust:100%;padding-top:env(safe-area-inset-top,0)}
+/* tenda da mercato: righe + smerlo, la firma della pagina */
+.awning{height:10px;background:repeating-linear-gradient(90deg,var(--awn1) 0 26px,var(--awn2) 26px 52px)}
+.awning::after{content:"";display:block;height:8px;
+  background:
+    radial-gradient(13px 13px at 13px 0,var(--awn1) 98%,transparent 100%) 0 0/52px 8px repeat-x,
+    radial-gradient(13px 13px at 13px 0,var(--awn2) 98%,transparent 100%) 26px 0/52px 8px repeat-x}
+.wrap{max-width:760px;margin:0 auto;padding:20px 14px calc(80px + env(safe-area-inset-bottom,0))}
+header.top{padding:8px 2px 18px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);margin:0 0 6px}
+h1{font-size:clamp(26px,6vw,34px);font-weight:800;margin:0 0 6px;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--ink2);font-size:14px;margin:0}
+.sub b{color:var(--ink);font-weight:600}
+.tabs{position:sticky;top:0;z-index:20;display:flex;gap:6px;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line)}
+.tab{flex:1;border:1px solid var(--line);background:var(--card);color:var(--ink2);font:inherit;font-size:14px;font-weight:600;padding:10px 8px;border-radius:10px;cursor:pointer}
+.tab.on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.tab:focus-visible,.chip:focus-visible,.dchip:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.tab,.chip,.dchip,.btn{transition:transform .12s}
+.tab:active,.chip:active,.dchip:active,.btn:active{transform:scale(.96)}
+/* selettore giorni */
+.dayfilter{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:14px 0;padding:10px 12px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+.dflabel{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+.dchips{display:flex;gap:5px;flex-wrap:wrap;flex:1;min-width:0}
+.dchip{border:1px solid var(--line);background:var(--card2);color:var(--ink2);font:inherit;font-size:13px;font-weight:700;min-width:42px;padding:7px 9px;border-radius:8px;cursor:pointer}
+.dchip.on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.btn.mini{padding:6px 10px;font-size:12px}
+.savebar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px;padding:9px 12px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+.savehint{font-size:11.5px;color:var(--ink2);flex-basis:100%;margin-top:1px}
+.savehint.ok{color:var(--acc);font-weight:600}
+.savehint.err{color:var(--deal);font-weight:600}
+.saverow{flex-basis:100%;display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.saverow textarea{flex:1;min-width:180px;font-size:12px;font-family:ui-monospace,Menlo,Consolas,monospace;line-height:1.35;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--card2);color:var(--ink);resize:vertical;word-break:break-all}
+.saverow-btns{display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap}
+.day{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:10px;box-shadow:var(--shadow);overflow:hidden}
+.day.off{opacity:.5}
+.day.off>summary h2{text-decoration:line-through;text-decoration-color:var(--ink2)}
+.day>summary{list-style:none;cursor:pointer;padding:13px 16px;display:flex;align-items:baseline;gap:10px}
+.day>summary::-webkit-details-marker{display:none}
+.day>summary h2{font-size:17px;font-weight:700;margin:0}
+.day>summary .hintline{color:var(--ink2);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.offbadge{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);border:1px solid var(--line);border-radius:99px;padding:1px 7px;white-space:nowrap}
+.day>summary .arrow{color:var(--ink2);font-size:12px;transition:transform .15s}
+.day[open]>summary .arrow{transform:rotate(90deg)}
+.meal{border-top:1px solid var(--line);padding:12px 16px}
+.meal h3{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);margin:0 0 8px}
+.fixrow{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:2px 0;align-items:baseline}
+.fixrow .nm{display:flex;gap:5px;align-items:baseline;flex-wrap:wrap}
+.fixrow .g{color:var(--ink2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.grp{margin:8px 0 4px}
+.grp .glabel{font-size:12.5px;color:var(--ink2);margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.05em;padding:1px 6px;border-radius:99px}
+.badge.A{background:var(--ale-soft);color:var(--ale)}
+.badge.L{background:var(--lisa-soft);color:var(--lisa)}
+.badge.AL{background:var(--acc-soft);color:var(--acc)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--card2);color:var(--ink);font:inherit;font-size:13px;padding:6px 11px;border-radius:99px;cursor:pointer;display:inline-flex;gap:5px;align-items:baseline}
+.chip .g{color:var(--ink2);font-size:12px;font-variant-numeric:tabular-nums}
+.chip.on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.chip.on .g{color:var(--acc-ink);opacity:.8}
+.chip.deal{border-color:var(--deal)}
+.chip .tag,.fixrow .tag{font-size:12px;line-height:1}
+.outrow{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:2px 0;color:var(--ink2);font-style:italic}
+/* lista */
+.listbar{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.listbar .prog{font-size:13px;color:var(--ink2);flex:1;font-variant-numeric:tabular-nums;min-width:120px}
+.pbar{flex-basis:100%;height:4px;border-radius:99px;background:var(--card2);overflow:hidden}
+.pbar i{display:block;height:100%;width:0;border-radius:99px;background:var(--acc);transition:width .25s}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:13px;font-weight:600;padding:7px 12px;border-radius:9px;cursor:pointer}
+.btn.primary{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.dept{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:12px;box-shadow:var(--shadow);overflow:hidden}
+.dept>h2{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin:0;padding:11px 16px 9px;color:var(--acc);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline}
+.dept>h2 .de{font-weight:500;letter-spacing:0;text-transform:none;color:var(--ink2);font-size:12px}
+.item{display:grid;grid-template-columns:auto 1fr auto;gap:4px 12px;padding:10px 16px;border-top:1px dashed var(--line);align-items:start}
+.item:first-of-type{border-top:none}
+.item input{width:22px;height:22px;margin:1px 0 0;accent-color:var(--acc)}
+.item .nm{font-size:14.5px;font-weight:600}
+.item .de{font-size:12.5px;color:var(--ink2)}
+.item .hint{font-size:12.5px;color:var(--ink2);grid-column:2/4}
+.item .hint.warn{color:var(--warn)}
+.item .offer{grid-column:2/4;justify-self:start;font-size:12px;font-weight:600;color:var(--acc);background:var(--acc-soft);border-radius:7px;padding:3px 9px;display:inline-flex;gap:5px;align-items:baseline}
+.item .offer.k{color:var(--deal);background:var(--deal-soft)}
+.item .qty{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.item .qty .tot{font-size:14px;font-weight:700}
+.item .qty .split{font-size:11px;color:var(--ink2)}
+.item .nm,.item .de,.item .qty,.item .offer{transition:opacity .15s}
+.item.done .nm,.item.done .de,.item.done .qty,.item.done .offer{opacity:.4}
+.item.done .nm{text-decoration:line-through}
+.note{background:var(--warn-soft);border:1px solid transparent;border-radius:12px;padding:11px 14px;font-size:13.5px;color:var(--ink);margin-bottom:10px}
+.note b{color:var(--warn)}
+.note.deal b{color:var(--deal)}
+.empty{background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:26px 16px;text-align:center;color:var(--ink2);font-size:14px}
+.legend{display:flex;gap:12px;font-size:12.5px;color:var(--ink2);margin:4px 2px 14px;flex-wrap:wrap}
+.legend span b{font-weight:700}
+.legend .A b{color:var(--ale)} .legend .L b{color:var(--lisa)}
+footer{color:var(--ink2);font-size:12.5px;margin-top:26px;padding:0 2px}
+footer p{margin:6px 0}
+.hidden{display:none}
+@media print{
+  .tabs,.listbar,.note,.dayfilter,#view-menu,.awning,.savebar{display:none}
+  #view-list{display:block!important}
+  body{background:#fff;color:#000}
+  .dept{break-inside:avoid;box-shadow:none}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+<style>html{margin:0}body{margin:0}</style>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+</head>
+<body>
+<div class="awning" aria-hidden="true"></div>
+<div class="wrap">
+<header class="top">
+  <p class="eyebrow">Piano di spesa combinato · Ale + Lisa</p>
+  <h1>La spesa del sabato</h1>
+  <p class="sub"><b>REWE Center</b> · Dorotheenstraße 116–122, Hamburg-Nord — <span id="weeklabel"></span></p>
+</header>
+
+<div class="tabs" role="tablist">
+  <button class="tab on" id="tab-menu" role="tab" aria-selected="true">Menù &amp; scelte</button>
+  <button class="tab" id="tab-list" role="tab" aria-selected="false">Lista della spesa</button>
+</div>
+
+<div class="dayfilter">
+  <span class="dflabel">Spesa per:</span>
+  <div class="dchips" id="dayfilter-chips"></div>
+  <button class="btn mini" id="days-all">Tutti</button>
+  <button class="btn mini" id="days-none">Nessuno</button>
+</div>
+
+<div class="savebar">
+  <span class="dflabel">Selezioni:</span>
+  <button class="btn mini" id="btn-save">💾 Salva codice</button>
+  <button class="btn mini" id="btn-restore">📂 Ripristina</button>
+  <span class="savehint" id="savehint">Salva un codice per non perdere le scelte se la pagina si ricarica — e per passarle a Lisa.</span>
+  <div class="saverow hidden" id="saverow">
+    <textarea id="code-input" rows="2" placeholder="Incolla qui il codice e premi Applica…" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"></textarea>
+    <div class="saverow-btns">
+      <button class="btn mini primary" id="code-apply">Applica</button>
+      <button class="btn mini" id="code-copy">Copia</button>
+      <button class="btn mini" id="code-close">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<div id="view-menu">
+  <div class="legend">
+    <span class="A"><b>A</b> = Alessandro</span>
+    <span class="L"><b>L</b> = Lisa</span>
+    <span>🏷️ = alternativa in offerta questa settimana</span>
+    <span>Tocca un'opzione per scegliere l'alternativa del pasto: la lista si aggiorna da sola.</span>
+  </div>
+  <div id="days"></div>
+</div>
+
+<div id="view-list" class="hidden">
+  <div class="note deal">🏷️ <b>Offerte REWE KW28</b> (valide 06–11.07.2026): il tag verde segnala le voci della lista in promozione; quello arancione i "Knaller", gli affari migliori.</div>
+  <div class="note"><b>Pesce:</b> la cena di martedì e i piatti di venerdì arrivano a 4–6 giorni dalla spesa — per quelli scegli il surgelato (TK) o congela subito a casa. Fresco dal banco solo per ciò che cucinate entro lunedì/martedì.</div>
+  <div class="listbar">
+    <span class="prog" id="prog"></span>
+    <button class="btn" id="btn-uncheck">Azzera spuntati</button>
+    <button class="btn primary" id="btn-copy">Copia lista</button>
+    <div class="pbar" aria-hidden="true"><i id="pfill"></i></div>
+  </div>
+  <div id="depts"></div>
+</div>
+
+<footer>
+  <p>Quantità = somma delle porzioni di Alessandro + Lisa per i <b>giorni selezionati</b>, secondo i piani del Dott. Marconi del 07/07/2026. Tutti i pesi sono <b>a crudo e al netto degli scarti</b>; ±10&nbsp;% va benissimo.</p>
+  <p>Le voci segnate "scorta" sono di dispensa: controlla cosa avete in casa prima di ricomprarle. Le offerte 🏷️ si riferiscono alla settimana KW28 e vanno aggiornate ogni sabato.</p>
+</footer>
+</div>
+
+<script>
+// ---------- catalogo alimenti ----------
+// d = reparto, de = nome tedesco, h = consiglio d'acquisto, tk = consiglia surgelato/congelare, sc = scorta dispensa
+const IT = {
+  frutta:{n:"Frutta fresca",de:"Obst nach Wahl",d:"orto",h:"porzioni da 150 g — meglio frutta con la buccia (mele, pere, frutti di bosco…)"},
+  verdure:{n:"Verdure miste",de:"Gemüse nach Wahl",d:"orto",h:"200 g a pasto, variare i colori; anche TK al naturale"},
+  patate:{n:"Patate",de:"Kartoffeln",d:"orto"},
+  patate_dolci:{n:"Patate dolci",de:"Süßkartoffeln",d:"orto"},
+  arance:{n:"Arance da spremuta",de:"Saftorangen",d:"orto",h:"il peso indicato è la spremuta: compra circa il doppio in arance"},
+  piselli:{n:"Piselli",de:"Erbsen (TK ok)",d:"orto"},
+  orata:{n:"Orata (filetti)",de:"Doradenfilet",d:"pesce",tk:1},
+  merluzzo:{n:"Merluzzo / nasello",de:"Kabeljau / Seehecht",d:"pesce",tk:1},
+  platessa:{n:"Platessa",de:"Scholle",d:"pesce",tk:1},
+  sogliola:{n:"Sogliola",de:"Seezunge",d:"pesce",tk:1},
+  spigola:{n:"Spigola",de:"Wolfsbarsch",d:"pesce",tk:1},
+  spada:{n:"Pesce spada",de:"Schwertfisch",d:"pesce",tk:1},
+  dentice:{n:"Dentice",de:"Zahnbrasse (raro — in alternativa Dorade)",d:"pesce",tk:1},
+  acciughe:{n:"Acciughe fresche",de:"frische Sardellen (raro al banco)",d:"pesce",tk:1},
+  sgombro:{n:"Sgombro fresco",de:"Makrele",d:"pesce",tk:1},
+  tonno_fresco:{n:"Tonno fresco",de:"Thunfischsteak",d:"pesce",tk:1},
+  gamberi:{n:"Gamberi",de:"Garnelen (TK)",d:"pesce",tk:1},
+  polpo:{n:"Polpo",de:"Oktopus / Pulpo (TK)",d:"pesce",tk:1},
+  calamari:{n:"Calamari",de:"Calamari / Tintenfisch (TK)",d:"pesce",tk:1},
+  seppie:{n:"Seppie",de:"Sepia (TK)",d:"pesce",tk:1},
+  molluschi:{n:"Molluschi (vongole, cozze…)",de:"Muscheln / Meeresfrüchte",d:"pesce",tk:1},
+  pesce_magro:{n:"Pesce magro a scelta",de:"magerer Weißfisch",d:"pesce",tk:1},
+  pesce_grasso:{n:"Pesce grasso (salmone, sgombro…)",de:"Lachs / Makrele",d:"pesce",tk:1},
+  pesce_azzurro:{n:"Pesce azzurro",de:"Makrele / Sardinen",d:"pesce",tk:1},
+  salmone_aff:{n:"Salmone affumicato",de:"Räucherlachs",d:"pesce"},
+  tonno_scatola:{n:"Tonno al naturale",de:"Thunfisch im eigenen Saft (Dose)",d:"dispensa"},
+  baccala:{n:"Baccalà ammollato",de:"Stockfisch, eingeweicht",d:"italia",h:"quasi introvabile al REWE — negozio portoghese/italiano, o scegli un altro pesce"},
+  tacchino:{n:"Tacchino, petto",de:"Putenbrustfilet",d:"carne"},
+  pollo:{n:"Pollo, petto",de:"Hähnchenbrustfilet",d:"carne"},
+  manzo:{n:"Manzo magro",de:"mageres Rindfleisch",d:"carne"},
+  vitello:{n:"Vitello magro",de:"Kalbfleisch",d:"carne"},
+  maiale:{n:"Maiale magro (filetto)",de:"Schweinefilet",d:"carne"},
+  prosciutto:{n:"Prosciutto cotto sgrassato",de:"Kochschinken, fettreduziert",d:"carne"},
+  yogurt:{n:"Yogurt greco 0%",de:"griechischer Joghurt 0,2 % (Elinas / Fage / ja!)",d:"frigo",h:"conviene in vasconi da 500 g o 1 kg"},
+  latte:{n:"Latte parzialmente scremato",de:"fettarme Milch 1,5 %",d:"frigo"},
+  alpro:{n:"Alpro avena Barista",de:"Alpro Hafer Barista",d:"frigo"},
+  formaggi_light:{n:"Formaggi freschi light",de:"Hüttenkäse / körniger Frischkäse / Mozzarella light",d:"frigo",h:"<150 kcal/100 g: fiocchi di latte, ricotta, primosale…"},
+  spalmabile:{n:"Formaggio spalmabile light",de:"Frischkäse light",d:"frigo"},
+  parm_dop:{n:"Parmigiano Reggiano DOP (pezzo)",de:"Parmigiano Reggiano am Stück",d:"frigo"},
+  parm_gratt:{n:"Parmigiano grattugiato",de:"geriebener Parmesan",d:"frigo",sc:1},
+  uova:{n:"Uova",de:"Eier",d:"frigo",h:"60 g ≈ 1 uovo grande a testa"},
+  tofu:{n:"Tofu affumicato",de:"Räuchertofu (Taifun / REWE Bio)",d:"frigo",h:"Vemondo è di Lidl — al REWE prendi Taifun o REWE Bio"},
+  pasta_uovo_fresca:{n:"Pasta all'uovo fresca",de:"frische Eiernudeln (Kühlregal)",d:"frigo"},
+  riso_venere:{n:"Riso Venere",de:"schwarzer Reis",d:"dispensa",sc:1},
+  basmati:{n:"Riso Basmati",de:"Basmatireis",d:"dispensa",sc:1},
+  farro:{n:"Farro perlato",de:"Dinkel / Perldinkel",d:"dispensa",sc:1,h:"peso a crudo (in dieta indicato anche cotto)"},
+  orzo:{n:"Orzo perlato",de:"Gerstengraupen",d:"dispensa",sc:1,h:"peso a crudo"},
+  quinoa:{n:"Quinoa",de:"Quinoa",d:"dispensa",sc:1,h:"peso a crudo"},
+  couscous:{n:"Couscous",de:"Couscous",d:"dispensa",sc:1},
+  grano_sar:{n:"Grano saraceno",de:"Buchweizen",d:"dispensa",sc:1},
+  miglio:{n:"Miglio",de:"Hirse",d:"dispensa",sc:1},
+  polenta:{n:"Polenta",de:"Polenta / Maisgrieß",d:"dispensa",sc:1},
+  mais:{n:"Mais in scatola",de:"Mais (Dose), abgetropft",d:"dispensa"},
+  pasta_semola:{n:"Pasta di semola",de:"Hartweizennudeln",d:"dispensa",sc:1},
+  pasta_uovo_secca:{n:"Pasta all'uovo secca",de:"Eierbandnudeln",d:"dispensa",sc:1},
+  pasta_legumi:{n:"Pasta di legumi",de:"Linsen- / Kichererbsennudeln",d:"dispensa"},
+  legumi_scatola:{n:"Legumi in scatola",de:"Hülsenfrüchte (Dose): Kichererbsen, Linsen, Bohnen",d:"dispensa",h:"peso sgocciolato — 1 lattina ≈ 240 g"},
+  legumi_secchi:{n:"Legumi secchi",de:"getrocknete Hülsenfrüchte",d:"dispensa",sc:1},
+  olio:{n:"Olio extravergine d'oliva",de:"natives Olivenöl extra",d:"dispensa",sc:1},
+  olive_verdi:{n:"Olive verdi",de:"grüne Oliven",d:"dispensa"},
+  olive_nere:{n:"Olive nere",de:"schwarze Oliven",d:"dispensa"},
+  riso_soff:{n:"Riso soffiato",de:"gepuffter Reis",d:"colazione",sc:1},
+  gallette:{n:"Gallette di riso",de:"Reiswaffeln",d:"colazione",sc:1},
+  fette_bisc:{n:"Fette biscottate",de:"Zwieback",d:"colazione",sc:1},
+  fette_bisc_sg:{n:"Fette biscottate senza glutine",de:"glutenfreier Zwieback (Schär)",d:"colazione",sc:1},
+  pane_bianco:{n:"Pane bianco",de:"Weißbrot / Brötchen",d:"colazione"},
+  pane_int:{n:"Pane integrale",de:"Vollkornbrot",d:"colazione"},
+  pane_seg:{n:"Pane di segale",de:"Roggenbrot",d:"colazione"},
+  pane_sg:{n:"Pane senza glutine",de:"glutenfreies Brot (Schär / REWE frei von)",d:"colazione"},
+  fiocchi:{n:"Fiocchi d'avena",de:"Haferflocken",d:"colazione",sc:1},
+  cornflakes:{n:"Cornflakes",de:"Cornflakes",d:"colazione",sc:1},
+  muesli:{n:"Muesli",de:"Müsli",d:"colazione",sc:1},
+  wasa:{n:"Wasa integrali",de:"Wasa Knäckebrot Vollkorn",d:"colazione",sc:1},
+  popcorn_mais:{n:"Mais per popcorn",de:"Popcorn-Mais",d:"colazione",sc:1},
+  barretta:{n:"Barretta Special K",de:"Kellogg's Riegel o barretta ai cereali simile",d:"colazione"},
+  marmellata:{n:"Marmellata",de:"Konfitüre",d:"colazione",sc:1},
+  miele:{n:"Miele",de:"Honig",d:"colazione",sc:1},
+  cacao:{n:"Cacao amaro",de:"Backkakao",d:"colazione",sc:1},
+  ciocc_latte:{n:"Cioccolato al latte",de:"Vollmilchschokolade",d:"colazione",sc:1},
+  ciocc_fond:{n:"Cioccolato fondente",de:"Zartbitterschokolade",d:"colazione",sc:1},
+  crema_nocc:{n:"Crema di nocciole e cacao",de:"Nuss-Nougat-Creme",d:"colazione",sc:1},
+  burro_fs:{n:"Burro di frutta secca 100%",de:"Erdnuss- / Mandelmus 100 %",d:"colazione",sc:1},
+  frutta_sec:{n:"Frutta secca (noci, mandorle…)",de:"Nüsse & Mandeln, natur",d:"colazione",sc:1},
+  semi_lino:{n:"Semi di lino",de:"Leinsamen",d:"colazione",sc:1},
+  cocco:{n:"Farina di cocco",de:"Kokosmehl",d:"colazione",sc:1},
+  albicocche_dis:{n:"Albicocche disidratate",de:"getrocknete Aprikosen",d:"colazione",sc:1},
+  mele_dis:{n:"Mele disidratate",de:"Apfelchips, ungezuckert",d:"colazione",sc:1},
+  pesche_dis:{n:"Pesche disidratate",de:"getrocknete Pfirsiche",d:"colazione",sc:1},
+  friselle:{n:"Friselle",de:"—",d:"italia",h:"negozio italiano o online"},
+  frise_int:{n:"Frise integrali",de:"—",d:"italia",h:"negozio italiano o online"},
+  taralli:{n:"Tarallini all'olio d'oliva",de:"Taralli",d:"italia",h:"negozio italiano; a volte nello scaffale internazionale"},
+  lupini:{n:"Lupini deamarizzati",de:"Lupinen in Lake",d:"italia",h:"negozio italiano/turco o online"},
+  legumotti:{n:"Barilla Legumotti",de:"—",d:"italia",h:"in alternativa: pasta di legumi corta"},
+  soia:{n:"Spezzatino di soia",de:"Sojaschnetzel grob (dm / Alnatura)",d:"italia",h:"al REWE a volte nel reparto bio"},
+  whey:{n:"Proteine Whey Isolate",de:"Whey Isolat",d:"italia",h:"dm, negozio sport o online — non al REWE"},
+  caffe:{n:"Caffè al bar",de:"",d:"fuori"},
+  cappuccino:{n:"Cappuccino al bar",de:"",d:"fuori"},
+  croissant:{n:"Croissant",de:"",d:"fuori",h:"dal panificio la domenica mattina"},
+  pizza:{n:"Pizza (cena libera del sabato)",de:"",d:"fuori",h:"pizzeria o pizza fatta in casa"},
+};
+
+const DEPTS = [
+  ["orto","Frutta & Verdura","Obst & Gemüse"],
+  ["pesce","Pesce","Fisch — banco o surgelato"],
+  ["carne","Carne & Salumi","Fleisch & Wurst"],
+  ["frigo","Banco frigo","Kühlregal & Molkerei"],
+  ["dispensa","Dispensa","Trockensortiment & Konserven"],
+  ["colazione","Colazione & Snack","Frühstück & Süßes"],
+  ["italia","Fuori REWE","negozio italiano · dm · online"],
+  ["fuori","Pasti fuori casa","non si compra: bar, pizzeria"],
+];
+
+// ---------- offerte REWE (aggiornare ogni settimana; svuotare {} per rimuovere i tag) ----------
+// KW28 · valide 06–11.07.2026. k:1 = "Knaller" (affare migliore, tag arancione).
+const OFFERS = {
+  pollo:{t:"Hähnchen-Brustfilet 1 kg — 9.90 €/kg",k:1},
+  pesce_grasso:{t:"Lachs-Filet norvegese — 1.99 €/100 g",k:1},
+  merluzzo:{t:"MSC Seelachs-Rückenfilet — 2.19 €/100 g"},
+  pesce_magro:{t:"Seelachs / Viktoriaseebarsch — ~2 €/100 g"},
+  manzo:{t:"Tafelspitz (banco) — 1.55 €/100 g",k:1},
+  salmone_aff:{t:"Krone Räucher-Lachs 150 g — 4.19 €"},
+  parm_gratt:{t:"Grana Padano DOP — 1.99 €/100 g (sostituto)"},
+  parm_dop:{t:"Grana Padano DOP — 1.99 €/100 g (alternativa)"},
+  alpro:{t:"Oatly Haferdrink Barista 1 L — 1.79 €"},
+  pane_int:{t:"Vollkornbrot 1000 g — 2.49 €"},
+  pasta_semola:{t:"3 Glocken Pasta 500 g — 0.99 €",k:1},
+  olio:{t:"Bertolli Olivenöl 500 ml — 5.99 €"},
+  patate:{t:"Speisekartoffeln 2 kg — 2.49 € (1.25 €/kg)"},
+  marmellata:{t:"Glück Konfitüre 230 g — 2.49 €"},
+  prosciutto:{t:"Abraham Schinken 80 g — 1.39 €"},
+  tonno_scatola:{t:"Followfood Protein Thunfisch 100 g — 2.39 €"},
+  pizza:{t:"Dr. Oetker Ristorante 1.99 € / Gustavo Gusto 3.69 €"},
+  frutta:{t:"in stagione: pesche piatte 1.11 €, albicocche 2.29 €/kg, mele Bio, banane 1.99 €/kg"},
+  verdure:{t:"iceberg 0.65 €, carote Bio 1 kg, broccoli Bimi 1.99 €, pomodorini 1.49 €"},
+};
+
+// ---------- piano settimanale ----------
+// ["f", id, gA, gL]  voce fissa   ·   ["c", chi, etichetta, [[id,gA,gL],…], defaultIndex]  scegli una
+const W = [
+ {d:"Lunedì", m:[
+  {n:"Colazione", e:[
+    ["f","caffe",40,40],
+    ["f","frutta",150,0],
+    ["c","A","Carboidrati",[["riso_soff",40,0],["pane_bianco",50,0],["gallette",40,0],["fette_bisc",30,0]],0],
+    ["c","L","Carboidrati",[["gallette",0,30],["riso_soff",0,30]],0],
+    ["f","marmellata",0,20],
+    ["c","AL","Proteine",[["yogurt",150,150],["whey",25,25]],0],
+  ]},
+  {n:"Spuntino", e:[
+    ["f","frutta",150,0],
+    ["c","AL","A scelta",[["lupini",50,50],["parm_dop",20,20]],1],
+    ["f","barretta",43,21],
+  ]},
+  {n:"Pranzo", e:[
+    ["c","AL","Riso",[["riso_venere",100,80],["basmati",100,80]],1],
+    ["f","olio",20,20],
+    ["c","AL","Proteine",[["tacchino",150,120],["pollo",200,150]],1],
+    ["f","verdure",200,200],
+  ]},
+  {n:"Merenda", e:[
+    ["f","frutta_sec",10,10],
+    ["f","yogurt",150,150],
+  ]},
+  {n:"Cena", e:[
+    ["f","formaggi_light",120,120],
+    ["f","olio",10,10],
+    ["c","A","Pane",[["pane_int",80,0],["pane_seg",80,0]],1],
+    ["f","pane_sg",0,80],
+    ["f","verdure",200,200],
+    ["f","parm_gratt",20,20],
+  ]},
+ ]},
+ {d:"Martedì", m:[
+  {n:"Colazione", e:[
+    ["f","caffe",40,40],
+    ["f","frutta",150,0],
+    ["f","yogurt",200,200],
+    ["f","fiocchi",30,0],
+    ["c","L","Cereali",[["riso_soff",0,20],["cornflakes",0,20]],0],
+    ["f","marmellata",0,20],
+    ["c","AL","Grassi",[["cocco",10,10],["burro_fs",10,10]],1],
+    ["f","semi_lino",15,15],
+  ]},
+  {n:"Spuntino", e:[
+    ["f","parm_dop",20,20],
+    ["f","taralli",20,0],
+    ["f","gallette",0,20],
+  ]},
+  {n:"Pranzo", e:[
+    ["c","A","Cereali (peso a crudo)",[["farro",80,0],["orzo",80,0],["quinoa",80,0],["frise_int",75,0],["pasta_semola",80,0],["friselle",70,0]],0],
+    ["c","L","Cereali",[["basmati",0,80],["riso_venere",0,80],["grano_sar",0,80],["polenta",0,80],["miglio",0,80],["quinoa",0,80],["mais",0,250]],2],
+    ["f","olio",10,10],
+    ["c","AL","Legumi",[["legumi_scatola",200,200],["legumi_secchi",50,50],["pasta_legumi",50,50]],0],
+    ["f","verdure",200,200],
+    ["f","parm_gratt",20,20],
+  ]},
+  {n:"Merenda", e:[
+    ["f","frutta",150,0],
+    ["f","frutta_sec",10,10],
+  ]},
+  {n:"Cena", e:[
+    ["f","olio",10,10],
+    ["c","A","Pane",[["pane_int",80,0],["pane_seg",80,0]],0],
+    ["f","patate",200,0],
+    ["c","L","Carboidrati",[["gallette",0,30],["patate",0,150],["pane_sg",0,50]],1],
+    ["f","verdure",200,200],
+    ["c","AL","Pesce bianco",[["merluzzo",300,250],["orata",200,150],["platessa",250,220],["sogliola",250,220],["spigola",250,220],["spada",200,150],["baccala",220,200]],0],
+  ]},
+ ]},
+ {d:"Mercoledì", m:[
+  {n:"Colazione", e:[
+    ["f","caffe",40,40],
+    ["f","frutta",150,0],
+    ["c","A","Carboidrati",[["riso_soff",40,0],["pane_bianco",50,0],["gallette",40,0],["fette_bisc",30,0]],2],
+    ["c","L","Carboidrati",[["gallette",0,40],["riso_soff",0,40],["fette_bisc_sg",0,30],["pane_sg",0,50]],0],
+    ["c","AL","Proteine",[["yogurt",150,150],["whey",25,25]],0],
+    ["c","L","Dolce",[["cacao",0,15],["marmellata",0,20],["miele",0,15]],1],
+  ]},
+  {n:"Spuntino", e:[
+    ["c","AL","Croccante",[["wasa",27,36],["popcorn_mais",20,30]],0],
+    ["c","AL","Formaggio",[["spalmabile",40,40],["parm_dop",20,20]],0],
+    ["f","frutta",150,0],
+    ["f","arance",0,205],
+  ]},
+  {n:"Pranzo", e:[
+    ["c","A","Carboidrati",[["basmati",100,0],["pasta_semola",100,0]],0],
+    ["c","L","Carboidrati",[["riso_venere",0,70],["basmati",0,70],["mais",0,250],["grano_sar",0,80],["quinoa",0,70],["miglio",0,70]],4],
+    ["f","olio",10,10],
+    ["c","AL","Pesce",[["tonno_scatola",180,120],["gamberi",250,180],["sgombro",100,80]],0],
+    ["f","verdure",200,200],
+    ["c","AL","Condimento",[["olive_verdi",60,60],["olive_nere",40,40],["olio",10,10]],0],
+  ]},
+  {n:"Merenda", e:[
+    ["f","frutta",150,0],
+    ["f","frutta_sec",20,10],
+  ]},
+  {n:"Cena", e:[
+    ["c","AL","Mare",[["polpo",350,350],["calamari",300,300],["gamberi",300,300],["seppie",300,300]],1],
+    ["f","olio",10,10],
+    ["c","A","Pane",[["pane_int",100,0],["pane_seg",100,0]],0],
+    ["f","pane_sg",0,80],
+    ["c","AL","Contorno",[["patate_dolci",250,200],["patate",250,200]],0],
+    ["f","verdure",200,200],
+  ]},
+ ]},
+ {d:"Giovedì", m:[
+  {n:"Colazione", e:[
+    ["f","caffe",40,40],
+    ["c","A","Pane",[["pane_int",60,0],["pane_seg",60,0]],1],
+    ["f","pane_sg",0,50],
+    ["f","salmone_aff",50,30],
+    ["c","A","Frutta",[["arance",200,0],["frutta",150,0]],0],
+    ["f","arance",0,200],
+  ]},
+  {n:"Spuntino", e:[
+    ["f","frutta",150,0],
+    ["f","frutta_sec",10,10],
+  ]},
+  {n:"Pranzo", e:[
+    ["f","uova",60,60],
+    ["f","olio",20,20],
+    ["f","pasta_semola",80,0],
+    ["f","basmati",0,60],
+    ["f","verdure",200,200],
+    ["f","prosciutto",50,50],
+    ["f","piselli",100,100],
+  ]},
+  {n:"Merenda", e:[
+    ["f","yogurt",150,150],
+    ["c","AL","Dolce",[["ciocc_fond",20,20],["ciocc_latte",20,20],["burro_fs",15,15],["crema_nocc",20,20]],0],
+  ]},
+  {n:"Cena", e:[
+    ["f","olio",10,10],
+    ["f","verdure",200,200],
+    ["c","AL","Contorno",[["patate_dolci",200,200],["patate",200,200]],1],
+    ["c","AL","Proteine",[["tacchino",200,150],["pollo",250,200]],0],
+  ]},
+ ]},
+ {d:"Venerdì", m:[
+  {n:"Colazione", e:[
+    ["f","caffe",40,40],
+    ["f","frutta",150,0],
+    ["c","AL","Proteine",[["yogurt",150,150],["whey",25,25]],0],
+    ["c","A","Carboidrati",[["riso_soff",40,0],["pane_bianco",50,0],["gallette",40,0],["fette_bisc",30,0]],1],
+    ["c","L","Carboidrati",[["gallette",0,40],["riso_soff",0,40],["pane_sg",0,60],["fette_bisc_sg",0,40]],2],
+    ["f","marmellata",0,20],
+  ]},
+  {n:"Spuntino", e:[
+    ["f","frutta",150,0],
+    ["f","frutta_sec",10,10],
+    ["f","barretta",43,21],
+  ]},
+  {n:"Pranzo", e:[
+    ["f","olio",20,20],
+    ["c","AL","Pesce",[["spigola",260,180],["merluzzo",300,200],["dentice",210,150],["sogliola",260,180],["orata",180,120],["platessa",260,180],["acciughe",220,150],["spada",200,120],["sgombro",130,80],["tonno_fresco",130,80]],0],
+    ["f","verdure",200,200],
+    ["c","A","Carboidrati (a crudo)",[["couscous",80,0],["farro",80,0],["orzo",80,0],["quinoa",80,0],["patate_dolci",350,0],["patate",350,0],["friselle",70,0],["frise_int",75,0]],0],
+    ["c","L","Carboidrati",[["couscous",0,80],["quinoa",0,80],["patate_dolci",0,350],["patate",0,350],["friselle",0,70],["frise_int",0,75]],0],
+  ]},
+  {n:"Merenda", e:[
+    ["f","frutta",150,0],
+    ["f","yogurt",200,150],
+    ["c","L","Dolce",[["albicocche_dis",0,20],["marmellata",0,20],["mele_dis",0,20],["ciocc_latte",0,10],["burro_fs",0,10],["crema_nocc",0,10],["ciocc_fond",0,10]],0],
+  ]},
+  {n:"Cena", e:[
+    ["c","AL","Legumi o pesce",[["pasta_legumi",50,50],["legumi_secchi",50,50],["legumi_scatola",200,200],["pesce_grasso",120,120],["pesce_azzurro",120,120]],0],
+    ["f","olio",10,10],
+    ["c","A","Pane",[["pane_int",80,0],["pane_seg",80,0]],1],
+    ["f","pane_sg",0,50],
+    ["f","verdure",200,200],
+    ["f","parm_gratt",20,10],
+  ]},
+ ]},
+ {d:"Sabato", m:[
+  {n:"Colazione", e:[
+    ["f","yogurt",200,200],
+    ["c","AL","Cereali",[["fiocchi",30,30],["cornflakes",30,30],["muesli",30,30]],0],
+    ["f","frutta",150,0],
+    ["f","frutta_sec",10,0],
+    ["c","L","Grassi",[["burro_fs",0,10],["frutta_sec",0,10]],0],
+  ]},
+  {n:"Spuntino", e:[
+    ["f","frutta",150,0],
+    ["f","frutta_sec",10,0],
+    ["c","AL","Latte",[["latte",150,150],["alpro",150,150]],0],
+    ["f","whey",25,25],
+  ]},
+  {n:"Pranzo", e:[
+    ["c","AL","Proteine",[["tacchino",200,120],["pollo",250,150]],0],
+    ["f","olio",10,10],
+    ["f","verdure",200,200],
+  ]},
+  {n:"Merenda", e:[
+    ["f","frutta",150,0],
+    ["f","parm_dop",20,20],
+  ]},
+  {n:"Cena", e:[
+    ["f","pizza",300,300],
+    ["f","verdure",200,200],
+  ]},
+ ]},
+ {d:"Domenica", m:[
+  {n:"Colazione", e:[
+    ["f","cappuccino",150,150],
+    ["f","croissant",50,50],
+  ]},
+  {n:"Spuntino", e:[
+    ["f","frutta",150,0],
+  ]},
+  {n:"Pranzo", e:[
+    ["c","AL","Pasta",[["pasta_uovo_fresca",120,90],["pasta_semola",100,80],["pasta_uovo_secca",100,80]],0],
+    ["f","olio",20,20],
+    ["c","AL","Proteine",[["manzo",200,100],["vitello",250,120],["maiale",180,80],["pesce_magro",300,150],["pesce_grasso",180,80],["molluschi",300,150]],0],
+    ["f","verdure",200,200],
+  ]},
+  {n:"Merenda", e:[
+    ["f","frutta",150,0],
+    ["f","yogurt",150,150],
+    ["c","L","Dolce",[["pesche_dis",0,20],["albicocche_dis",0,20],["mele_dis",0,20],["marmellata",0,30]],1],
+  ]},
+  {n:"Cena", e:[
+    ["f","olio",10,10],
+    ["c","A","Pane",[["pane_int",50,0],["pane_seg",50,0]],0],
+    ["f","pane_sg",0,50],
+    ["f","verdure",200,200],
+    ["c","AL","Proteine veg o legumi",[["tofu",120,120],["soia",50,50],["pasta_legumi",50,50],["legumotti",50,50],["legumi_scatola",200,200],["legumi_secchi",50,50]],0],
+    ["f","parm_gratt",20,20],
+  ]},
+  {n:"Spuntino serale", e:[
+    ["f","yogurt",150,150],
+    ["f","cacao",10,10],
+  ]},
+ ]},
+];
+
+// ---------- stato ----------
+const LSKEY = "spesa-ale-lisa-v2";
+let state = {sel:{}, chk:{}, week:"", days:null};
+try{ const s = JSON.parse(localStorage.getItem(LSKEY)); if(s && s.sel) state = s; }catch(e){}
+if(!Array.isArray(state.days) || state.days.length !== 7) state.days = [true,true,true,true,true,true,true];
+
+function save(){ try{ localStorage.setItem(LSKEY, JSON.stringify(state)); }catch(e){} syncHash(); }
+
+// ---------- salvataggio robusto: codice esportabile + URL (per sandbox mobile) ----------
+function encodeState(){
+  try{
+    var payload = {s:state.sel, c:state.chk, d:state.days, w:state.week};
+    return btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  }catch(e){ return ""; }
+}
+function applyState(code){
+  try{
+    var payload = JSON.parse(decodeURIComponent(escape(atob((code||"").trim()))));
+    if(payload && payload.s){
+      state.sel = payload.s || {};
+      state.chk = payload.c || {};
+      if(Array.isArray(payload.d) && payload.d.length === 7) state.days = payload.d;
+      if(payload.w) state.week = payload.w;
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+function syncHash(){
+  try{ history.replaceState(null, "", "#s=" + encodeURIComponent(encodeState())); }catch(e){}
+}
+// all'apertura: se l'URL porta un codice (es. link salvato o file standalone), ripristina
+try{
+  var _m = (location.hash || "").match(/s=([^&]+)/);
+  if(_m){ applyState(decodeURIComponent(_m[1])); }
+}catch(e){}
+
+// settimana: sabato di spesa = prossimo sabato (o oggi se sabato), copre lun–dom successivi
+function weekInfo(){
+  const now = new Date();
+  const sat = new Date(now);
+  sat.setDate(now.getDate() + ((6 - now.getDay()) + 7) % 7);
+  const mon = new Date(sat); mon.setDate(sat.getDate() + 2);
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  const f = d => d.toLocaleDateString("it-IT",{day:"numeric",month:"short"});
+  return {label:`spesa sabato ${f(sat)} · settimana ${f(mon)} – ${f(sun)}`, key:sat.toISOString().slice(0,10)};
+}
+const wk = weekInfo();
+document.getElementById("weeklabel").textContent = wk.label;
+if(state.week !== wk.key){ state.chk = {}; state.week = wk.key; save(); }
+
+const DAYS_SHORT = ["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
+// n = numero di opzioni: un codice salvato prima di un aggiornamento del piano
+// può puntare a un'opzione che non esiste più → si torna al default.
+function selIndex(cid, def, n){
+  const i = (cid in state.sel) ? state.sel[cid] : def;
+  return (Number.isInteger(i) && i >= 0 && i < n) ? i : def;
+}
+function fmtG(g){ return g >= 1000 ? (g/1000).toLocaleString("it-IT",{maximumFractionDigits:2}) + " kg" : g + " g"; }
+function cidOf(di, mi, ei){ return di + "." + mi + "." + ei; }
+
+// ---------- selettore giorni ----------
+function renderDayFilter(){
+  const bar = document.getElementById("dayfilter-chips");
+  bar.innerHTML = "";
+  W.forEach((day, di) => {
+    const b = document.createElement("button");
+    b.className = "dchip" + (state.days[di] ? " on" : "");
+    b.textContent = DAYS_SHORT[di];
+    b.setAttribute("aria-pressed", state.days[di] ? "true" : "false");
+    b.setAttribute("aria-label", day.d);
+    b.onclick = () => { state.days[di] = !state.days[di]; save(); renderAll(); };
+    bar.appendChild(b);
+  });
+}
+
+// ---------- vista menù ----------
+function chipLabel(opt){
+  const it = IT[opt[0]];
+  const parts = [];
+  if(opt[1]) parts.push("A " + opt[1]);
+  if(opt[2]) parts.push("L " + opt[2]);
+  return {name: it.n, g: parts.join(" · ") + " g"};
+}
+const openSet = new Set([0]);
+function renderMenu(){
+  const root = document.getElementById("days");
+  root.innerHTML = "";
+  W.forEach((day, di) => {
+    const det = document.createElement("details");
+    det.className = "day" + (state.days[di] ? "" : " off");
+    det.open = openSet.has(di);
+    det.addEventListener("toggle", () => { if(det.open) openSet.add(di); else openSet.delete(di); });
+    const mainDishes = day.m.filter(m => /Pranzo|Cena/.test(m.n)).map(m => {
+      const c = m.e.find(e => e[0] === "c" && e[1] === "AL");
+      if(c) return IT[c[3][selIndex(cidOf(di, day.m.indexOf(m), m.e.indexOf(c)), c[4], c[3].length)][0]].n;
+      const f = m.e.find(e => e[0] === "f" && !["olio","verdure","parm_gratt","caffe"].includes(e[1]));
+      return f ? IT[f[1]].n : "";
+    }).filter(Boolean).join(" · ");
+    const badge = state.days[di] ? "" : `<span class="offbadge">non in spesa</span>`;
+    det.innerHTML = `<summary><span class="arrow">▶</span><h2>${day.d}</h2><span class="hintline">${mainDishes}</span>${badge}</summary>`;
+    day.m.forEach((meal, mi) => {
+      const mv = document.createElement("div");
+      mv.className = "meal";
+      mv.innerHTML = `<h3>${meal.n}</h3>`;
+      meal.e.forEach((e, ei) => {
+        if(e[0] === "f"){
+          const it = IT[e[1]];
+          const off = OFFERS[e[1]];
+          const row = document.createElement("div");
+          row.className = it.d === "fuori" ? "outrow" : "fixrow";
+          const who = [];
+          if(e[2]) who.push("A " + e[2]);
+          if(e[3]) who.push("L " + e[3]);
+          const tag = off ? ` <span class="tag" title="Offerta: ${off.t}">🏷️</span>` : "";
+          row.innerHTML = `<span class="nm">${it.n}${tag}</span><span class="g">${who.join(" · ")} g</span>`;
+          mv.appendChild(row);
+        } else {
+          const cid = cidOf(di, mi, ei);
+          const grp = document.createElement("div");
+          grp.className = "grp";
+          const lab = document.createElement("div");
+          lab.className = "glabel";
+          lab.innerHTML = `<span class="badge ${e[1]}">${e[1] === "AL" ? "A+L" : e[1]}</span> ${e[2]} — scegli una`;
+          grp.appendChild(lab);
+          const chips = document.createElement("div");
+          chips.className = "chips";
+          e[3].forEach((opt, oi) => {
+            const b = document.createElement("button");
+            const cl = chipLabel(opt);
+            const off = OFFERS[opt[0]];
+            b.className = "chip" + (selIndex(cid, e[4], e[3].length) === oi ? " on" : "") + (off ? " deal" : "");
+            b.innerHTML = `${cl.name} <span class="g">${cl.g}</span>` + (off ? ` <span class="tag" title="Offerta: ${off.t}">🏷️</span>` : "");
+            b.onclick = () => { state.sel[cid] = oi; save(); renderMenu(); renderList(); };
+            chips.appendChild(b);
+          });
+          grp.appendChild(chips);
+          mv.appendChild(grp);
+        }
+      });
+      det.appendChild(mv);
+    });
+    root.appendChild(det);
+  });
+}
+
+// ---------- vista lista ----------
+function computeList(){
+  const acc = {};
+  W.forEach((day, di) => {
+    if(!state.days[di]) return;
+    day.m.forEach((meal, mi) => meal.e.forEach((e, ei) => {
+      let id, a, l;
+      if(e[0] === "f"){ [ , id, a, l] = e; }
+      else { const opt = e[3][selIndex(cidOf(di, mi, ei), e[4], e[3].length)]; [id, a, l] = opt; }
+      if(!acc[id]) acc[id] = {a:0, l:0};
+      acc[id].a += a; acc[id].l += l;
+    }));
+  });
+  return acc;
+}
+function renderList(){
+  const acc = computeList();
+  const root = document.getElementById("depts");
+  root.innerHTML = "";
+  const nDays = state.days.filter(Boolean).length;
+  let tot = 0, done = 0;
+  if(nDays === 0){
+    root.innerHTML = `<div class="empty">Nessun giorno selezionato.<br>Scegli i giorni della spesa qui sopra.</div>`;
+    document.getElementById("prog").textContent = "0 giorni selezionati";
+    document.getElementById("pfill").style.width = "0";
+    return;
+  }
+  DEPTS.forEach(([dk, dn, dde]) => {
+    const ids = Object.keys(acc).filter(id => IT[id].d === dk).sort((x, y) => IT[x].n.localeCompare(IT[y].n, "it"));
+    if(!ids.length) return;
+    const box = document.createElement("section");
+    box.className = "dept";
+    box.innerHTML = `<h2>${dn} <span class="de">${dde}</span></h2>`;
+    ids.forEach(id => {
+      const it = IT[id], q = acc[id], off = OFFERS[id];
+      const buyable = dk !== "fuori";
+      if(buyable) tot++;
+      const checked = !!state.chk[id];
+      if(buyable && checked) done++;
+      const row = document.createElement("label");
+      row.className = "item" + (checked ? " done" : "");
+      const split = [q.a ? "A " + q.a + " g" : "", q.l ? "L " + q.l + " g" : ""].filter(Boolean).join(" · ");
+      const hints = [];
+      if(it.h) hints.push(it.h);
+      if(it.tk) hints.push("banco fresco solo se lo cucinate entro lun/mar — altrimenti TK o congela");
+      if(it.sc) hints.push("scorta: controlla la dispensa");
+      row.innerHTML =
+        `<input type="checkbox" ${checked ? "checked" : ""} ${buyable ? "" : "disabled"} aria-label="${it.n}">` +
+        `<span><span class="nm">${it.n}</span>${it.de ? `<br><span class="de">${it.de}</span>` : ""}</span>` +
+        `<span class="qty"><span class="tot">${fmtG(q.a + q.l)}</span><br><span class="split">${split}</span></span>` +
+        (hints.length ? `<span class="hint${it.tk ? " warn" : ""}">${hints.join(" · ")}</span>` : "") +
+        (off ? `<span class="offer${off.k ? " k" : ""}">🏷️ ${off.t}</span>` : "");
+      const cb = row.querySelector("input");
+      cb.onchange = () => { state.chk[id] = cb.checked; save(); renderList(); };
+      box.appendChild(row);
+    });
+    root.appendChild(box);
+  });
+  const dayNote = nDays === 7 ? "settimana intera" : state.days.map((v, i) => v ? DAYS_SHORT[i] : null).filter(Boolean).join(", ");
+  document.getElementById("prog").textContent = `${done} / ${tot} presi · ${dayNote}`;
+  document.getElementById("pfill").style.width = tot ? (done / tot * 100).toFixed(1) + "%" : "0";
+}
+
+function renderAll(){ renderDayFilter(); renderMenu(); renderList(); }
+
+// ---------- azioni ----------
+let hintTimer = null;
+function setHint(msg, ok, err){
+  const el = document.getElementById("savehint");
+  el.textContent = msg;
+  el.classList.toggle("ok", !!ok);
+  el.classList.toggle("err", !!err);
+  if(hintTimer) clearTimeout(hintTimer);
+  hintTimer = setTimeout(() => {
+    el.textContent = "Salva un codice per non perdere le scelte se la pagina si ricarica — e per passarle a Lisa.";
+    el.classList.remove("ok"); el.classList.remove("err");
+  }, 4500);
+}
+const saverow = document.getElementById("saverow");
+const codeInput = document.getElementById("code-input");
+function openCodeBox(value){
+  saverow.classList.remove("hidden");
+  codeInput.value = value || "";
+  codeInput.focus();
+  if(value){ try{ codeInput.setSelectionRange(0, value.length); }catch(e){} }
+}
+function closeCodeBox(){ saverow.classList.add("hidden"); codeInput.value = ""; }
+async function copyText(t){ try{ await navigator.clipboard.writeText(t); return true; }catch(e){ return false; } }
+
+document.getElementById("btn-save").onclick = async () => {
+  const code = encodeState();
+  syncHash();
+  if(!code){ setHint("Impossibile generare il codice"); return; }
+  openCodeBox(code);
+  const ok = await copyText(code);
+  setHint(ok ? "Codice copiato ✓ — o copialo qui sotto. Conservalo / passalo a Lisa." : "Copia il codice qui sotto e conservalo.", ok);
+};
+document.getElementById("btn-restore").onclick = () => {
+  openCodeBox("");
+  setHint("Incolla il codice nella casella e premi Applica.");
+};
+document.getElementById("code-apply").onclick = () => {
+  const v = (codeInput.value || "").trim();
+  if(!v){ setHint("Prima incolla il codice", false, true); return; }
+  if(applyState(v)){ save(); renderAll(); closeCodeBox(); setHint("Selezioni ripristinate ✓", true); }
+  else setHint("Codice non valido — controlla di averlo incollato per intero", false, true);
+};
+document.getElementById("code-copy").onclick = async () => {
+  if(!codeInput.value){ codeInput.value = encodeState(); }
+  try{ codeInput.setSelectionRange(0, codeInput.value.length); }catch(e){}
+  const ok = await copyText(codeInput.value);
+  setHint(ok ? "Copiato ✓" : "Seleziona il testo e copialo a mano", ok, !ok);
+};
+document.getElementById("code-close").onclick = () => { closeCodeBox(); setHint("", false); };
+document.getElementById("days-all").onclick = () => { state.days = [true,true,true,true,true,true,true]; save(); renderAll(); };
+document.getElementById("days-none").onclick = () => { state.days = [false,false,false,false,false,false,false]; save(); renderAll(); };
+document.getElementById("btn-uncheck").onclick = () => { state.chk = {}; save(); renderList(); };
+document.getElementById("btn-copy").onclick = async () => {
+  const acc = computeList();
+  const nDays = state.days.filter(Boolean).length;
+  const dayNote = nDays === 7 ? "settimana intera" : state.days.map((v, i) => v ? DAYS_SHORT[i] : null).filter(Boolean).join(", ");
+  let out = "SPESA REWE — Ale + Lisa — " + wk.label + "\nGiorni: " + (dayNote || "nessuno") + "\n";
+  let hasOffer = false;
+  DEPTS.forEach(([dk, dn]) => {
+    const ids = Object.keys(acc).filter(id => IT[id].d === dk && dk !== "fuori").sort((x, y) => IT[x].n.localeCompare(IT[y].n, "it"));
+    if(!ids.length) return;
+    out += "\n" + dn.toUpperCase() + "\n";
+    ids.forEach(id => {
+      const q = acc[id], off = OFFERS[id];
+      if(off) hasOffer = true;
+      out += `[ ] ${IT[id].n} — ${fmtG(q.a + q.l)}${IT[id].de ? " (" + IT[id].de + ")" : ""}${off ? "  🏷️ " + off.t : ""}\n`;
+    });
+  });
+  if(hasOffer) out += "\n🏷️ = in offerta REWE KW28 (valida 06–11.07)\n";
+  try{
+    await navigator.clipboard.writeText(out);
+    const b = document.getElementById("btn-copy");
+    b.textContent = "Copiata ✓";
+    setTimeout(() => b.textContent = "Copia lista", 1500);
+  }catch(e){ openCodeBox(out); setHint("Copia la lista dalla casella qui sopra (nel menù) — clipboard non disponibile."); }
+};
+
+const tabMenu = document.getElementById("tab-menu"), tabList = document.getElementById("tab-list");
+function showTab(which){
+  const menu = which === "menu";
+  tabMenu.classList.toggle("on", menu); tabList.classList.toggle("on", !menu);
+  tabMenu.setAttribute("aria-selected", menu); tabList.setAttribute("aria-selected", !menu);
+  document.getElementById("view-menu").classList.toggle("hidden", !menu);
+  document.getElementById("view-list").classList.toggle("hidden", menu);
+}
+tabMenu.onclick = () => showTab("menu");
+tabList.onclick = () => showTab("list");
+
+renderAll();
+</script>
+<script>if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("./sw.js"));}</script>
+</body>
+</html>

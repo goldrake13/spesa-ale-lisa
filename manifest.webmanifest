@@ -1,0 +1,15 @@
+{
+  "name": "La spesa del sabato — Ale + Lisa",
+  "short_name": "Spesa",
+  "description": "Piano di spesa settimanale combinato per il REWE di Hamburg-Nord",
+  "lang": "it",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f6f1",
+  "theme_color": "#2f7a44",
+  "icons": [
+    { "src": "icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
