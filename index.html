@@ -206,7 +206,7 @@ footer p{margin:6px 0}
 </div>
 
 <div id="view-list" class="hidden">
-  <div class="note deal">🏷️ <b>Offerte REWE KW28</b> (valide 06–11.07.2026): il tag verde segnala le voci della lista in promozione; quello arancione i "Knaller", gli affari migliori.</div>
+  <div class="note deal">🏷️ <b>Offerte REWE <span id="offers-kw">KW29</span></b> (valide <span id="offers-dates">13–18.07.2026</span>): il tag verde segnala le voci della lista in promozione; quello arancione i "Knaller", gli affari migliori.</div>
   <div class="note"><b>Pesce:</b> la cena di martedì e i piatti di venerdì arrivano a 4–6 giorni dalla spesa — per quelli scegli il surgelato (TK) o congela subito a casa. Fresco dal banco solo per ciò che cucinate entro lunedì/martedì.</div>
   <div class="listbar">
     <span class="prog" id="prog"></span>
@@ -219,7 +219,7 @@ footer p{margin:6px 0}
 
 <footer>
   <p>Quantità = somma delle porzioni di Alessandro + Lisa per i <b>giorni selezionati</b>, secondo i piani del Dott. Marconi del 07/07/2026. Tutti i pesi sono <b>a crudo e al netto degli scarti</b>; ±10&nbsp;% va benissimo.</p>
-  <p>Le voci segnate "scorta" sono di dispensa: controlla cosa avete in casa prima di ricomprarle. Le offerte 🏷️ si riferiscono alla settimana KW28 e vanno aggiornate ogni sabato.</p>
+  <p>Le voci segnate "scorta" sono di dispensa: controlla cosa avete in casa prima di ricomprarle. Le offerte 🏷️ si riferiscono alla settimana <span id="offers-kw-piede">KW29</span> e vanno aggiornate ogni sabato.</p>
 </footer>
 </div>
 
@@ -366,6 +366,8 @@ const OFFERS = {
   frutta:{t:"nettarine 1.59 €/kg, pere Abate 2.99 €/kg, melone 1.69 €/kg, lamponi 1.99 €, kiwi SunGold 1.11 €/pz"},
   verdure:{t:"pomodori(ni) 1.69–2.22 €, broccoli Bio 1.39 €, lattuga 1.79 €, misticanza 1.19 €"},
 };
+// Etichetta della settimana offerte: unica fonte per le note in pagina e la lista copiata.
+const OFFERS_KW = "KW29", OFFERS_DATES = "13–18.07.2026";
 
 // ---------- piano settimanale ----------
 // ["f", id, gA, gL]  voce fissa   ·   ["c", chi, etichetta, [[id,gA,gL],…], defaultIndex]  scegli una
@@ -655,6 +657,9 @@ function weekInfo(){
 }
 const wk = weekInfo();
 document.getElementById("weeklabel").textContent = wk.label;
+document.getElementById("offers-kw").textContent = OFFERS_KW;
+document.getElementById("offers-kw-piede").textContent = OFFERS_KW;
+document.getElementById("offers-dates").textContent = OFFERS_DATES;
 if(state.week !== wk.key){ state.chk = {}; state.week = wk.key; save(); }
 
 const DAYS_SHORT = ["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
@@ -885,7 +890,7 @@ document.getElementById("btn-copy").onclick = async () => {
       out += `[ ] ${IT[id].n} — ${fmtG(q.a + q.l)}${IT[id].de ? " (" + IT[id].de + ")" : ""}${off ? "  🏷️ " + off.t : ""}\n`;
     });
   });
-  if(hasOffer) out += "\n🏷️ = in offerta REWE KW28 (valida 06–11.07)\n";
+  if(hasOffer) out += `\n🏷️ = in offerta REWE ${OFFERS_KW} (valida ${OFFERS_DATES})\n`;
   try{
     await navigator.clipboard.writeText(out);
     const b = document.getElementById("btn-copy");
