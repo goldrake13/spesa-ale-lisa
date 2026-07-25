@@ -744,6 +744,10 @@ function selIndex(cid, def, n){
   return (Number.isInteger(i) && i >= 0 && i < n) ? i : def;
 }
 function fmtG(g){ return g >= 1000 ? (g/1000).toLocaleString("it-IT",{maximumFractionDigits:2}) + " kg" : g + " g"; }
+function splitLabel(q){
+  return [q.a ? "A " + q.a + " g" : "",
+          q.l ? "L " + q.l + " g" : ""].filter(Boolean).join(" · ");
+}
 function cidOf(di, mi, ei){ return di + "." + mi + "." + ei; }
 
 // ---------- selettore giorni ----------
@@ -883,7 +887,7 @@ function itemRow(id, q, off, altOff, altNome){
   const checked = !!state.chk[id];
   const row = document.createElement("label");
   row.className = "item" + (checked ? " done" : "");
-  const split = [q.a ? "A " + q.a + " g" : "", q.l ? "L " + q.l + " g" : ""].filter(Boolean).join(" · ");
+  const split = splitLabel(q);
   const hints = [];
   if(it.h) hints.push(it.h);
   if(it.tk) hints.push("banco fresco solo se lo cucinate entro lun/mar — altrimenti TK o congela");
@@ -913,7 +917,7 @@ function renderFuoriCasa(acc, root){
     const it = IT[id], q = acc[id];
     const row = document.createElement("label");
     row.className = "item";
-    const split = [q.a ? "A " + q.a + " g" : "", q.l ? "L " + q.l + " g" : ""].filter(Boolean).join(" · ");
+    const split = splitLabel(q);
     row.innerHTML =
       `<input type="checkbox" disabled aria-label="${it.n}">` +
       `<span><span class="nm">${it.n}</span></span>` +
