@@ -137,6 +137,10 @@ h1{font-size:clamp(26px,6vw,34px);font-weight:800;margin:0 0 6px;letter-spacing:
 .item .offer{grid-column:2/4;justify-self:start;font-size:12px;font-weight:600;color:var(--acc);background:var(--acc-soft);border-radius:7px;padding:3px 9px;display:inline-flex;gap:5px;align-items:baseline}
 .item .offer.k{color:var(--deal);background:var(--deal-soft)}
 .item .offer.alt{color:var(--ink2);background:var(--card2);font-weight:600}
+.item .mv{grid-column:2/4;justify-self:start;border:1px solid var(--line);background:var(--card2);color:var(--ink2);font:inherit;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:7px;cursor:pointer;transition:transform .12s}
+.item .mv:active{transform:scale(.96)}
+.item .mv:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.linkbtn{border:none;background:none;padding:0;font:inherit;font-weight:700;color:var(--acc);text-decoration:underline;cursor:pointer}
 .item .qty{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
 .item .qty .tot{font-size:14px;font-weight:700}
 .item .qty .split{font-size:11px;color:var(--ink2)}
@@ -882,7 +886,7 @@ function renderOffersNote(){
   el.innerHTML = `🏷️ <b>Offerte ${nome} ${meta.kw}</b> (valide ${meta.dates}): il tag verde segnala le voci in promozione, quello arancione i "Knaller". In grigio, quando c'è, l'offerta dell'altro negozio: serve a capire perché una voce sta di qua e non di là.`;
 }
 
-function itemRow(id, q, off, altOff, altNome){
+function itemRow(id, q, off, altOff, altNome, altK){
   const it = IT[id];
   const checked = !!state.chk[id];
   const row = document.createElement("label");
@@ -898,9 +902,12 @@ function itemRow(id, q, off, altOff, altNome){
     `<span class="qty"><span class="tot">${fmtG(q.a + q.l)}</span><br><span class="split">${split}</span></span>` +
     (hints.length ? `<span class="hint${it.tk ? " warn" : ""}">${hints.join(" · ")}</span>` : "") +
     (off ? `<span class="offer${off.k ? " k" : ""}">🏷️ ${off.t}</span>` : "") +
-    (altOff ? `<span class="offer alt">${altNome}: ${altOff.t}</span>` : "");
+    (altOff ? `<span class="offer alt">${altNome}: ${altOff.t}</span>` : "") +
+    (altK && puoSpostare(id) ? `<button class="mv" type="button">→ ${altNome}</button>` : "");
   const cb = row.querySelector("input");
   cb.onchange = () => { state.chk[id] = cb.checked; save(); renderList(); };
+  const mv = row.querySelector(".mv");
+  if(mv) mv.onclick = ev => { ev.preventDefault(); ev.stopPropagation(); moveItem(id, altK); };
   return row;
 }
 
@@ -959,7 +966,7 @@ function renderList(){
     ids.forEach(id => {
       tot++;
       if(state.chk[id]) done++;
-      box.appendChild(itemRow(id, acc[id], off[id], altOff[id], altNome));
+      box.appendChild(itemRow(id, acc[id], off[id], altOff[id], altNome, altK));
     });
     root.appendChild(box);
   });
@@ -972,6 +979,41 @@ function renderList(){
   const dayNote = nDays === 7 ? "settimana intera" : state.days.map((v, i) => v ? DAYS_SHORT[i] : null).filter(Boolean).join(", ");
   document.getElementById("prog").textContent = `${done} / ${tot} presi · ${nomeNeg} · ${dayNote}`;
   document.getElementById("pfill").style.width = tot ? (done / tot * 100).toFixed(1) + "%" : "0";
+}
+
+// ---------- spostare una voce fra i due supermercati ----------
+// Solo Lidl ↔ REWE: "Altro" è una commissione diversa (negozio italiano, dm, online)
+// e i pasti fuori casa non si comprano affatto.
+function puoSpostare(id){
+  const s = storeOf(id);
+  return s === "lidl" || s === "rewe";
+}
+function moveItem(id, to){
+  if(!puoSpostare(id) || !STORE_KEYS.has(to)) return;
+  const from = storeOf(id);
+  if(from === to) return;
+  state.mv[id] = to;
+  save();
+  renderList();
+  flashMove(id, from, to);
+}
+function undoMove(id, from){
+  if(IT[id].s === from) delete state.mv[id]; else state.mv[id] = from;
+  save();
+  renderList();
+}
+// La voce sparisce dalla lista corrente: senza un messaggio, un tocco a vuoto sembra
+// aver cancellato qualcosa. Il testo vive nella barra del progresso, che il prossimo
+// renderList riscrive comunque.
+let moveTimer = null;
+function flashMove(id, from, to){
+  const nome = (STORES.find(s => s[0] === to) || [,""])[1];
+  const prog = document.getElementById("prog");
+  prog.innerHTML = `${IT[id].n} → ${nome} · <button class="linkbtn" id="mv-undo">Annulla</button>`;
+  const u = document.getElementById("mv-undo");
+  if(u) u.onclick = ev => { ev.preventDefault(); ev.stopPropagation(); undoMove(id, from); };
+  if(moveTimer) clearTimeout(moveTimer);
+  moveTimer = setTimeout(() => renderList(), 6000);
 }
 
 function renderAll(){ renderDayFilter(); renderMenu(); renderList(); }
