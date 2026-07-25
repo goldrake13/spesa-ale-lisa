@@ -116,6 +116,12 @@ h1{font-size:clamp(26px,6vw,34px);font-weight:800;margin:0 0 6px;letter-spacing:
 .listbar .prog{font-size:13px;color:var(--ink2);flex:1;font-variant-numeric:tabular-nums;min-width:120px}
 .pbar{flex-basis:100%;height:4px;border-radius:99px;background:var(--card2);overflow:hidden}
 .pbar i{display:block;height:100%;width:0;border-radius:99px;background:var(--acc);transition:width .25s}
+.stores{display:flex;gap:6px;margin-bottom:10px}
+.schip{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;border:1px solid var(--line);background:var(--card);color:var(--ink2);font:inherit;font-size:13.5px;font-weight:700;padding:9px 8px;border-radius:10px;cursor:pointer;transition:transform .12s}
+.schip .cnt{font-size:11px;font-weight:600;opacity:.75;font-variant-numeric:tabular-nums}
+.schip.on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.schip:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.schip:active{transform:scale(.96)}
 .btn{border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:13px;font-weight:600;padding:7px 12px;border-radius:9px;cursor:pointer}
 .btn.primary{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
 .dept{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:12px;box-shadow:var(--shadow);overflow:hidden}
@@ -130,6 +136,7 @@ h1{font-size:clamp(26px,6vw,34px);font-weight:800;margin:0 0 6px;letter-spacing:
 .item .hint.warn{color:var(--warn)}
 .item .offer{grid-column:2/4;justify-self:start;font-size:12px;font-weight:600;color:var(--acc);background:var(--acc-soft);border-radius:7px;padding:3px 9px;display:inline-flex;gap:5px;align-items:baseline}
 .item .offer.k{color:var(--deal);background:var(--deal-soft)}
+.item .offer.alt{color:var(--ink2);background:var(--card2);font-weight:600}
 .item .qty{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
 .item .qty .tot{font-size:14px;font-weight:700}
 .item .qty .split{font-size:11px;color:var(--ink2)}
@@ -147,7 +154,7 @@ footer{color:var(--ink2);font-size:12.5px;margin-top:26px;padding:0 2px}
 footer p{margin:6px 0}
 .hidden{display:none}
 @media print{
-  .tabs,.listbar,.note,.dayfilter,#view-menu,.awning,.savebar{display:none}
+  .tabs,.listbar,.stores,.note,.dayfilter,#view-menu,.awning,.savebar{display:none}
   #view-list{display:block!important}
   body{background:#fff;color:#000}
   .dept{break-inside:avoid;box-shadow:none}
@@ -206,8 +213,9 @@ footer p{margin:6px 0}
 </div>
 
 <div id="view-list" class="hidden">
-  <div class="note deal">🏷️ <b>Offerte REWE <span id="offers-kw">KW29</span></b> (valide <span id="offers-dates">13–18.07.2026</span>): il tag verde segnala le voci della lista in promozione; quello arancione i "Knaller", gli affari migliori.</div>
+  <div class="note deal" id="offers-note"></div>
   <div class="note"><b>Pesce:</b> la cena di martedì e i piatti di venerdì arrivano a 4–6 giorni dalla spesa — per quelli scegli il surgelato (TK) o congela subito a casa. Fresco dal banco solo per ciò che cucinate entro lunedì/martedì.</div>
+  <div class="stores" id="stores" role="group" aria-label="Negozio"></div>
   <div class="listbar">
     <span class="prog" id="prog"></span>
     <button class="btn" id="btn-uncheck">Azzera spuntati</button>
@@ -219,7 +227,7 @@ footer p{margin:6px 0}
 
 <footer>
   <p>Quantità = somma delle porzioni di Alessandro + Lisa per i <b>giorni selezionati</b>, secondo i piani del Dott. Marconi del 07/07/2026. Tutti i pesi sono <b>a crudo e al netto degli scarti</b>; ±10&nbsp;% va benissimo.</p>
-  <p>Le voci segnate "scorta" sono di dispensa: controlla cosa avete in casa prima di ricomprarle. Le offerte 🏷️ si riferiscono alla settimana <span id="offers-kw-piede">KW29</span> e vanno aggiornate ogni sabato.</p>
+  <p>Le voci segnate "scorta" sono di dispensa: controlla cosa avete in casa prima di ricomprarle. Le offerte 🏷️ si riferiscono alle settimane indicate in cima alla lista, una per negozio, e vanno aggiornate ogni sabato.</p>
 </footer>
 </div>
 
@@ -253,7 +261,7 @@ const IT = {
   pesce_azzurro:{n:"Pesce azzurro",de:"Makrele / Sardinen",d:"pesce",s:"rewe",tk:1},
   salmone_aff:{n:"Salmone affumicato",de:"Räucherlachs",d:"pesce",s:"lidl"},
   tonno_scatola:{n:"Tonno al naturale",de:"Thunfisch im eigenen Saft (Dose)",d:"dispensa",s:"rewe"},
-  baccala:{n:"Baccalà ammollato",de:"Stockfisch, eingeweicht",d:"italia",s:"altro",h:"quasi introvabile al REWE — negozio portoghese/italiano, o scegli un altro pesce"},
+  baccala:{n:"Baccalà ammollato",de:"Stockfisch, eingeweicht",d:"pesce",s:"altro",h:"quasi introvabile al REWE — negozio portoghese/italiano, o scegli un altro pesce"},
   tacchino:{n:"Tacchino, petto",de:"Putenbrustfilet",d:"carne",s:"lidl"},
   pollo:{n:"Pollo, petto",de:"Hähnchenbrustfilet",d:"carne",s:"lidl"},
   manzo:{n:"Manzo magro",de:"mageres Rindfleisch",d:"carne",s:"rewe"},
@@ -315,13 +323,13 @@ const IT = {
   albicocche_dis:{n:"Albicocche disidratate",de:"getrocknete Aprikosen",d:"colazione",s:"rewe",sc:1},
   mele_dis:{n:"Mele disidratate",de:"Apfelchips, ungezuckert",d:"colazione",s:"rewe",sc:1},
   pesche_dis:{n:"Pesche disidratate",de:"getrocknete Pfirsiche",d:"colazione",s:"rewe",sc:1},
-  friselle:{n:"Friselle",de:"—",d:"italia",s:"altro",h:"negozio italiano o online"},
-  frise_int:{n:"Frise integrali",de:"—",d:"italia",s:"altro",h:"negozio italiano o online"},
-  taralli:{n:"Tarallini all'olio d'oliva",de:"Taralli",d:"italia",s:"altro",h:"negozio italiano; a volte nello scaffale internazionale"},
-  lupini:{n:"Lupini deamarizzati",de:"Lupinen in Lake",d:"italia",s:"altro",h:"negozio italiano/turco o online"},
-  legumotti:{n:"Barilla Legumotti",de:"—",d:"italia",s:"altro",h:"in alternativa: pasta di legumi corta"},
-  soia:{n:"Spezzatino di soia",de:"Sojaschnetzel grob (dm / Alnatura)",d:"italia",s:"altro",h:"al REWE a volte nel reparto bio"},
-  whey:{n:"Proteine Whey Isolate",de:"Whey Isolat",d:"italia",s:"altro",h:"dm, negozio sport o online — non al REWE"},
+  friselle:{n:"Friselle",de:"—",d:"colazione",s:"altro",h:"negozio italiano o online"},
+  frise_int:{n:"Frise integrali",de:"—",d:"colazione",s:"altro",h:"negozio italiano o online"},
+  taralli:{n:"Tarallini all'olio d'oliva",de:"Taralli",d:"colazione",s:"altro",h:"negozio italiano; a volte nello scaffale internazionale"},
+  lupini:{n:"Lupini deamarizzati",de:"Lupinen in Lake",d:"dispensa",s:"altro",h:"negozio italiano/turco o online"},
+  legumotti:{n:"Barilla Legumotti",de:"—",d:"dispensa",s:"altro",h:"in alternativa: pasta di legumi corta"},
+  soia:{n:"Spezzatino di soia",de:"Sojaschnetzel grob (dm / Alnatura)",d:"dispensa",s:"altro",h:"al REWE a volte nel reparto bio"},
+  whey:{n:"Proteine Whey Isolate",de:"Whey Isolat",d:"colazione",s:"altro",h:"dm, negozio sport o online — non al REWE"},
   caffe:{n:"Caffè al bar",de:"",d:"fuori",s:"no"},
   cappuccino:{n:"Cappuccino al bar",de:"",d:"fuori",s:"no"},
   croissant:{n:"Croissant",de:"",d:"fuori",s:"no",h:"dal panificio la domenica mattina"},
@@ -339,6 +347,7 @@ const STORES = [
 ];
 const STORE_KEYS = new Set(STORES.map(s => s[0]));
 
+// Reparti = il percorso DENTRO il supermercato, in ordine. In quale supermercato lo dice STORES.
 const DEPTS = [
   ["orto","Frutta & Verdura","Obst & Gemüse"],
   ["pesce","Pesce","Fisch — banco o surgelato"],
@@ -346,8 +355,6 @@ const DEPTS = [
   ["frigo","Banco frigo","Kühlregal & Molkerei"],
   ["dispensa","Dispensa","Trockensortiment & Konserven"],
   ["colazione","Colazione & Snack","Frühstück & Süßes"],
-  ["italia","Fuori REWE","negozio italiano · dm · online"],
-  ["fuori","Pasti fuori casa","non si compra: bar, pizzeria"],
 ];
 
 // ---------- offerte REWE (aggiornare ogni settimana; svuotare {} per rimuovere i tag) ----------
@@ -727,9 +734,6 @@ function weekInfo(){
 }
 const wk = weekInfo();
 document.getElementById("weeklabel").textContent = wk.label;
-document.getElementById("offers-kw").textContent = OFFERS_META.rewe.kw;
-document.getElementById("offers-kw-piede").textContent = OFFERS_META.rewe.kw;
-document.getElementById("offers-dates").textContent = OFFERS_META.rewe.dates;
 if(state.week !== wk.key){ state.chk = {}; state.week = wk.key; save(); }
 
 const DAYS_SHORT = ["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
@@ -842,51 +846,127 @@ function computeList(){
   });
   return acc;
 }
+// ---------- vista lista ----------
+function storeCounts(acc){
+  const c = {no:0};
+  STORES.forEach(([k]) => c[k] = 0);
+  Object.keys(acc).forEach(id => { const s = storeOf(id); if(s in c) c[s]++; });
+  return c;
+}
+
+function renderStorePicker(counts){
+  const bar = document.getElementById("stores");
+  bar.innerHTML = "";
+  STORES.forEach(([k, nome]) => {
+    const on = state.store === k;
+    const b = document.createElement("button");
+    b.className = "schip" + (on ? " on" : "");
+    b.innerHTML = `${nome}<span class="cnt">${counts[k]} voci</span>`;
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+    b.onclick = () => { state.store = k; save(); renderList(); };
+    bar.appendChild(b);
+  });
+}
+
+// La nota verde segue il negozio selezionato. "Altro" non ha volantino → nota nascosta.
+function renderOffersNote(){
+  const el = document.getElementById("offers-note");
+  const meta = OFFERS_META[state.store];
+  if(!meta){ el.classList.add("hidden"); return; }
+  el.classList.remove("hidden");
+  const nome = (STORES.find(s => s[0] === state.store) || [,""])[1];
+  el.innerHTML = `🏷️ <b>Offerte ${nome} ${meta.kw}</b> (valide ${meta.dates}): il tag verde segnala le voci in promozione, quello arancione i "Knaller". In grigio, quando c'è, l'offerta dell'altro negozio: serve a capire perché una voce sta di qua e non di là.`;
+}
+
+function itemRow(id, q, off, altOff, altNome){
+  const it = IT[id];
+  const checked = !!state.chk[id];
+  const row = document.createElement("label");
+  row.className = "item" + (checked ? " done" : "");
+  const split = [q.a ? "A " + q.a + " g" : "", q.l ? "L " + q.l + " g" : ""].filter(Boolean).join(" · ");
+  const hints = [];
+  if(it.h) hints.push(it.h);
+  if(it.tk) hints.push("banco fresco solo se lo cucinate entro lun/mar — altrimenti TK o congela");
+  if(it.sc) hints.push("scorta: controlla la dispensa");
+  row.innerHTML =
+    `<input type="checkbox" ${checked ? "checked" : ""} aria-label="${it.n}">` +
+    `<span><span class="nm">${it.n}</span>${it.de ? `<br><span class="de">${it.de}</span>` : ""}</span>` +
+    `<span class="qty"><span class="tot">${fmtG(q.a + q.l)}</span><br><span class="split">${split}</span></span>` +
+    (hints.length ? `<span class="hint${it.tk ? " warn" : ""}">${hints.join(" · ")}</span>` : "") +
+    (off ? `<span class="offer${off.k ? " k" : ""}">🏷️ ${off.t}</span>` : "") +
+    (altOff ? `<span class="offer alt">${altNome}: ${altOff.t}</span>` : "");
+  const cb = row.querySelector("input");
+  cb.onchange = () => { state.chk[id] = cb.checked; save(); renderList(); };
+  return row;
+}
+
+// Sezione fissa in fondo, fuori dal selettore: serve solo a ricordare cosa è previsto
+// questa settimana. Non si compra, quindi niente checkbox attive e niente conteggio.
+function renderFuoriCasa(acc, root){
+  const ids = Object.keys(acc).filter(id => storeOf(id) === "no")
+    .sort((x, y) => IT[x].n.localeCompare(IT[y].n, "it"));
+  if(!ids.length) return;
+  const box = document.createElement("section");
+  box.className = "dept";
+  box.innerHTML = `<h2>Pasti fuori casa <span class="de">non si compra: bar, pizzeria</span></h2>`;
+  ids.forEach(id => {
+    const it = IT[id], q = acc[id];
+    const row = document.createElement("label");
+    row.className = "item";
+    const split = [q.a ? "A " + q.a + " g" : "", q.l ? "L " + q.l + " g" : ""].filter(Boolean).join(" · ");
+    row.innerHTML =
+      `<input type="checkbox" disabled aria-label="${it.n}">` +
+      `<span><span class="nm">${it.n}</span></span>` +
+      `<span class="qty"><span class="tot">${fmtG(q.a + q.l)}</span><br><span class="split">${split}</span></span>` +
+      (it.h ? `<span class="hint">${it.h}</span>` : "");
+    box.appendChild(row);
+  });
+  root.appendChild(box);
+}
+
 function renderList(){
   const acc = computeList();
   const root = document.getElementById("depts");
   root.innerHTML = "";
+  renderStorePicker(storeCounts(acc));
+  renderOffersNote();
   const nDays = state.days.filter(Boolean).length;
-  let tot = 0, done = 0;
   if(nDays === 0){
     root.innerHTML = `<div class="empty">Nessun giorno selezionato.<br>Scegli i giorni della spesa qui sopra.</div>`;
     document.getElementById("prog").textContent = "0 giorni selezionati";
     document.getElementById("pfill").style.width = "0";
     return;
   }
+  // Offerte del negozio in cui sei + quelle dell'altro supermercato, per il confronto.
+  const off    = state.store === "lidl" ? OFFERS_LIDL : (state.store === "rewe" ? OFFERS_REWE : {});
+  const altK   = state.store === "lidl" ? "rewe" : (state.store === "rewe" ? "lidl" : null);
+  const altOff = altK === "lidl" ? OFFERS_LIDL : (altK === "rewe" ? OFFERS_REWE : {});
+  const altNome= altK ? (STORES.find(s => s[0] === altK) || [,""])[1] : "";
+
+  let tot = 0, done = 0;
   DEPTS.forEach(([dk, dn, dde]) => {
-    const ids = Object.keys(acc).filter(id => IT[id].d === dk).sort((x, y) => IT[x].n.localeCompare(IT[y].n, "it"));
+    const ids = Object.keys(acc)
+      .filter(id => IT[id].d === dk && storeOf(id) === state.store)
+      .sort((x, y) => IT[x].n.localeCompare(IT[y].n, "it"));
     if(!ids.length) return;
     const box = document.createElement("section");
     box.className = "dept";
     box.innerHTML = `<h2>${dn} <span class="de">${dde}</span></h2>`;
     ids.forEach(id => {
-      const it = IT[id], q = acc[id], off = OFFERS_REWE[id];
-      const buyable = dk !== "fuori";
-      if(buyable) tot++;
-      const checked = !!state.chk[id];
-      if(buyable && checked) done++;
-      const row = document.createElement("label");
-      row.className = "item" + (checked ? " done" : "");
-      const split = [q.a ? "A " + q.a + " g" : "", q.l ? "L " + q.l + " g" : ""].filter(Boolean).join(" · ");
-      const hints = [];
-      if(it.h) hints.push(it.h);
-      if(it.tk) hints.push("banco fresco solo se lo cucinate entro lun/mar — altrimenti TK o congela");
-      if(it.sc) hints.push("scorta: controlla la dispensa");
-      row.innerHTML =
-        `<input type="checkbox" ${checked ? "checked" : ""} ${buyable ? "" : "disabled"} aria-label="${it.n}">` +
-        `<span><span class="nm">${it.n}</span>${it.de ? `<br><span class="de">${it.de}</span>` : ""}</span>` +
-        `<span class="qty"><span class="tot">${fmtG(q.a + q.l)}</span><br><span class="split">${split}</span></span>` +
-        (hints.length ? `<span class="hint${it.tk ? " warn" : ""}">${hints.join(" · ")}</span>` : "") +
-        (off ? `<span class="offer${off.k ? " k" : ""}">🏷️ ${off.t}</span>` : "");
-      const cb = row.querySelector("input");
-      cb.onchange = () => { state.chk[id] = cb.checked; save(); renderList(); };
-      box.appendChild(row);
+      tot++;
+      if(state.chk[id]) done++;
+      box.appendChild(itemRow(id, acc[id], off[id], altOff[id], altNome));
     });
     root.appendChild(box);
   });
+  if(!tot){
+    root.innerHTML = `<div class="empty">Niente da comprare qui per i giorni scelti.</div>`;
+  }
+  renderFuoriCasa(acc, root);
+
+  const nomeNeg = (STORES.find(s => s[0] === state.store) || [,""])[1];
   const dayNote = nDays === 7 ? "settimana intera" : state.days.map((v, i) => v ? DAYS_SHORT[i] : null).filter(Boolean).join(", ");
-  document.getElementById("prog").textContent = `${done} / ${tot} presi · ${dayNote}`;
+  document.getElementById("prog").textContent = `${done} / ${tot} presi · ${nomeNeg} · ${dayNote}`;
   document.getElementById("pfill").style.width = tot ? (done / tot * 100).toFixed(1) + "%" : "0";
 }
 
@@ -943,7 +1023,11 @@ document.getElementById("code-copy").onclick = async () => {
 document.getElementById("code-close").onclick = () => { closeCodeBox(); setHint("", false); };
 document.getElementById("days-all").onclick = () => { state.days = [true,true,true,true,true,true,true]; save(); renderAll(); };
 document.getElementById("days-none").onclick = () => { state.days = [false,false,false,false,false,false,false]; save(); renderAll(); };
-document.getElementById("btn-uncheck").onclick = () => { state.chk = {}; save(); renderList(); };
+document.getElementById("btn-uncheck").onclick = () => {
+  const acc = computeList();
+  Object.keys(acc).forEach(id => { if(storeOf(id) === state.store) delete state.chk[id]; });
+  save(); renderList();
+};
 document.getElementById("btn-copy").onclick = async () => {
   const acc = computeList();
   const nDays = state.days.filter(Boolean).length;
