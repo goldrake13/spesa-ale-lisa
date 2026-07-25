@@ -352,7 +352,7 @@ const DEPTS = [
 
 // ---------- offerte REWE (aggiornare ogni settimana; svuotare {} per rimuovere i tag) ----------
 // KW30 · valide 20–25.07.2026 (sabato 25.07 è l'ultimo giorno). k:1 = "Knaller" (affare migliore, tag arancione).
-const OFFERS = {
+const OFFERS_REWE = {
   maiale:{t:"Schweine-Filet — 0.88 €/100 g (filetto intero)",k:1},
   manzo:{t:"Rinderbraten (banco) — 1.49 €/100 g · Entrecôte 2.99 €/100 g"},
   tacchino:{t:"Frische Puten-Medaillons 400 g — 5.99 € (14.98 €/kg)"},
@@ -387,8 +387,33 @@ const OFFERS = {
   frutta:{t:"pesche piatte 0.99 €/500 g, banane 1.79 €/kg, uva bianca 1.69 €/500 g, mirtilli 1.99 €/200 g, prugne 3.49 €/kg (−20% col coupon Bonus), mele Gala 3.33 €/kg"},
   verdure:{t:"lattuga romana 3 pz 1.19 €, pomodorini 1.11 €/500 g, champignon 1.59 €/400 g, zucchine Bio 1.11 €/500 g, porro 0.59 €/pz, cipolle 1,5 kg 1.59 €"},
 };
-// Etichetta della settimana offerte: unica fonte per le note in pagina e la lista copiata.
-const OFFERS_KW = "KW30", OFFERS_DATES = "20–25.07.2026";
+// ---------- offerte Lidl (KW30 · 20–25.07.2026, sabato 25.07 ultimo giorno) ----------
+// Prezzi verificati incrociando il Grundpreis ("1 kg = …") del volantino.
+// 🔑 nel testo = serve l'app Lidl Plus, altrimenti si paga il prezzo pieno.
+const OFFERS_LIDL = {
+  frutta:{t:"mele rosse 1.99 €/kg · mirtilli 1.79/250 g (7.16 €/kg) · prugne 1.79 €/kg · melone Galia 1.15 €/kg · anguria 0.88 €/kg",k:1},
+  verdure:{t:"zucchine 0.99 €/kg · pomodori Roma 0.88/500 g 🔑 (1.76 €/kg) · peperoni rossi 1.11/500 g · melanzane 1.39 €/kg",k:1},
+  tacchino:{t:"Puten-Minifilets 800 g — 7.99 € (9.99 €/kg)",k:1},
+  pollo:{t:"Hähnchen-Minutenschnitzel — 9.49 €/kg"},
+  orata:{t:"Eridanous Dorade Royal TK intera eviscerata ~1 kg — 9.99 € (9.84 €/kg)",k:1},
+  calamari:{t:"Eridanous Tintenfisch a pezzi TK, 900 g sgocciolati — 11.49 € 🔑 (12.77 €/kg)",k:1},
+  polpo:{t:"Eridanous tentacoli TK, 540 g sgocciolati — 9.99 € (18.50 €/kg)"},
+  pesce_grasso:{t:"Lachsseite norvegese ~1 kg — 13.49 €/kg — ATTENZIONE: già scongelata, non ricongelabile"},
+  olio:{t:"Eridanous EVO 3 L — 26.99 € (9.00 €/l) · EVO g.U. 1 L — 9.99 €",k:1},
+  olive_verdi:{t:"Eridanous verdi denocciolate, 850 g sgocciolati — 5.99 € (7.05 €/kg)"},
+  miele:{t:"Eridanous miele greco 450 g — 3.99 € (8.87 €/kg)"},
+  frutta_sec:{t:"Alesto 🔑: mandorle 150 g 1.69 € (11.27 €/kg) · pistacchi 250 g 2.49 € (9.96 €/kg) · Nuts Royal 200 g 2.19 €"},
+  tofu:{t:"−10 % su tutti gli articoli Vemondo 🔑 (venerdì e sabato)"},
+  marmellata:{t:"Maribel Konfitüre Extra 450 g — 1.79 € (3.98 €/kg, prezzo di listino)"},
+  formaggi_light:{t:"Milbona Speisequark 500 g — 1.38 € (2.76 €/kg; 20 % F.i.Tr., più grasso dei fiocchi di latte)"},
+  latte:{t:"Weihenstephan Haltbare Milch 3,5/1,5 % 1 L — 0.99 €"},
+  tonno_scatola:{t:"Saupiquet Thunfisch-Filets/Salat 2×160 g — 3.99 € (12.47 €/kg; non 'al naturale')"},
+};
+// Settimana delle offerte, per negozio: unica fonte per le note in pagina e la lista copiata.
+const OFFERS_META = {
+  rewe: { kw:"KW30", dates:"20–25.07.2026" },
+  lidl: { kw:"KW30", dates:"20–25.07.2026" },
+};
 
 // ---------- piano settimanale ----------
 // ["f", id, gA, gL]  voce fissa   ·   ["c", chi, etichetta, [[id,gA,gL],…], defaultIndex]  scegli una
@@ -702,9 +727,9 @@ function weekInfo(){
 }
 const wk = weekInfo();
 document.getElementById("weeklabel").textContent = wk.label;
-document.getElementById("offers-kw").textContent = OFFERS_KW;
-document.getElementById("offers-kw-piede").textContent = OFFERS_KW;
-document.getElementById("offers-dates").textContent = OFFERS_DATES;
+document.getElementById("offers-kw").textContent = OFFERS_META.rewe.kw;
+document.getElementById("offers-kw-piede").textContent = OFFERS_META.rewe.kw;
+document.getElementById("offers-dates").textContent = OFFERS_META.rewe.dates;
 if(state.week !== wk.key){ state.chk = {}; state.week = wk.key; save(); }
 
 const DAYS_SHORT = ["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
@@ -764,7 +789,7 @@ function renderMenu(){
       meal.e.forEach((e, ei) => {
         if(e[0] === "f"){
           const it = IT[e[1]];
-          const off = OFFERS[e[1]];
+          const off = OFFERS_REWE[e[1]];
           const row = document.createElement("div");
           row.className = it.d === "fuori" ? "outrow" : "fixrow";
           const who = [];
@@ -786,7 +811,7 @@ function renderMenu(){
           e[3].forEach((opt, oi) => {
             const b = document.createElement("button");
             const cl = chipLabel(opt);
-            const off = OFFERS[opt[0]];
+            const off = OFFERS_REWE[opt[0]];
             b.className = "chip" + (selIndex(cid, e[4], e[3].length) === oi ? " on" : "") + (off ? " deal" : "");
             b.innerHTML = `${cl.name} <span class="g">${cl.g}</span>` + (off ? ` <span class="tag" title="Offerta: ${off.t}">🏷️</span>` : "");
             b.onclick = () => { state.sel[cid] = oi; save(); renderMenu(); renderList(); };
@@ -836,7 +861,7 @@ function renderList(){
     box.className = "dept";
     box.innerHTML = `<h2>${dn} <span class="de">${dde}</span></h2>`;
     ids.forEach(id => {
-      const it = IT[id], q = acc[id], off = OFFERS[id];
+      const it = IT[id], q = acc[id], off = OFFERS_REWE[id];
       const buyable = dk !== "fuori";
       if(buyable) tot++;
       const checked = !!state.chk[id];
@@ -930,12 +955,12 @@ document.getElementById("btn-copy").onclick = async () => {
     if(!ids.length) return;
     out += "\n" + dn.toUpperCase() + "\n";
     ids.forEach(id => {
-      const q = acc[id], off = OFFERS[id];
+      const q = acc[id], off = OFFERS_REWE[id];
       if(off) hasOffer = true;
       out += `[ ] ${IT[id].n} — ${fmtG(q.a + q.l)}${IT[id].de ? " (" + IT[id].de + ")" : ""}${off ? "  🏷️ " + off.t : ""}\n`;
     });
   });
-  if(hasOffer) out += `\n🏷️ = in offerta REWE ${OFFERS_KW} (valida ${OFFERS_DATES})\n`;
+  if(hasOffer) out += `\n🏷️ = in offerta REWE ${OFFERS_META.rewe.kw} (valida ${OFFERS_META.rewe.dates})\n`;
   try{
     await navigator.clipboard.writeText(out);
     const b = document.getElementById("btn-copy");
