@@ -989,7 +989,7 @@ function puoSpostare(id){
   return s === "lidl" || s === "rewe";
 }
 function moveItem(id, to){
-  if(!puoSpostare(id) || !STORE_KEYS.has(to)) return;
+  if(!puoSpostare(id) || (to !== "lidl" && to !== "rewe")) return;
   const from = storeOf(id);
   if(from === to) return;
   state.mv[id] = to;
