@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#2f7a44">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Spesa REWE">
+<meta name="apple-mobile-web-app-title" content="Spesa">
 <meta name="robots" content="noindex">
 <title>La spesa del sabato — Ale + Lisa</title>
 <style>
@@ -176,7 +176,7 @@ footer p{margin:6px 0}
 <header class="top">
   <p class="eyebrow">Piano di spesa combinato · Ale + Lisa</p>
   <h1>La spesa del sabato</h1>
-  <p class="sub"><b>REWE Center</b> · Dorotheenstraße 116–122, Hamburg-Nord — <span id="weeklabel"></span></p>
+  <p class="sub"><b>Lidl</b> + <b>REWE Center</b> · Dorotheenstraße 116–122, Hamburg-Nord — <span id="weeklabel"></span></p>
 </header>
 
 <div class="tabs" role="tablist">
@@ -210,7 +210,7 @@ footer p{margin:6px 0}
   <div class="legend">
     <span class="A"><b>A</b> = Alessandro</span>
     <span class="L"><b>L</b> = Lisa</span>
-    <span>🏷️ = alternativa in offerta questa settimana</span>
+    <span>🏷️ = alternativa in offerta questa settimana (REWE o Lidl)</span>
     <span>Tocca un'opzione per scegliere l'alternativa del pasto: la lista si aggiorna da sola.</span>
   </div>
   <div id="days"></div>
@@ -752,6 +752,15 @@ function splitLabel(q){
   return [q.a ? "A " + q.a + " g" : "",
           q.l ? "L " + q.l + " g" : ""].filter(Boolean).join(" · ");
 }
+// Un'alternativa del menù è "in offerta" se lo è in almeno uno dei due supermercati.
+// Il titolo dice quale, così si sa dove conviene prenderla.
+function offertaMenu(id){
+  const r = OFFERS_REWE[id], l = OFFERS_LIDL[id];
+  const parti = [];
+  if(r) parti.push("REWE: " + r.t);
+  if(l) parti.push("Lidl: " + l.t);
+  return parti.length ? parti.join(" · ") : null;
+}
 function cidOf(di, mi, ei){ return di + "." + mi + "." + ei; }
 
 // ---------- selettore giorni ----------
@@ -801,13 +810,13 @@ function renderMenu(){
       meal.e.forEach((e, ei) => {
         if(e[0] === "f"){
           const it = IT[e[1]];
-          const off = OFFERS_REWE[e[1]];
+          const off = offertaMenu(e[1]);
           const row = document.createElement("div");
           row.className = it.d === "fuori" ? "outrow" : "fixrow";
           const who = [];
           if(e[2]) who.push("A " + e[2]);
           if(e[3]) who.push("L " + e[3]);
-          const tag = off ? ` <span class="tag" title="Offerta: ${off.t}">🏷️</span>` : "";
+          const tag = off ? ` <span class="tag" title="Offerta: ${off}">🏷️</span>` : "";
           row.innerHTML = `<span class="nm">${it.n}${tag}</span><span class="g">${who.join(" · ")} g</span>`;
           mv.appendChild(row);
         } else {
@@ -823,9 +832,9 @@ function renderMenu(){
           e[3].forEach((opt, oi) => {
             const b = document.createElement("button");
             const cl = chipLabel(opt);
-            const off = OFFERS_REWE[opt[0]];
+            const off = offertaMenu(opt[0]);
             b.className = "chip" + (selIndex(cid, e[4], e[3].length) === oi ? " on" : "") + (off ? " deal" : "");
-            b.innerHTML = `${cl.name} <span class="g">${cl.g}</span>` + (off ? ` <span class="tag" title="Offerta: ${off.t}">🏷️</span>` : "");
+            b.innerHTML = `${cl.name} <span class="g">${cl.g}</span>` + (off ? ` <span class="tag" title="Offerta: ${off}">🏷️</span>` : "");
             b.onclick = () => { state.sel[cid] = oi; save(); renderMenu(); renderList(); };
             chips.appendChild(b);
           });
@@ -1074,23 +1083,33 @@ document.getElementById("btn-uncheck").onclick = () => {
   Object.keys(acc).forEach(id => { if(storeOf(id) === state.store) delete state.chk[id]; });
   save(); renderList();
 };
-document.getElementById("btn-copy").onclick = async () => {
-  const acc = computeList();
+// Copia la lista del negozio in cui sei: quello che vedi è quello che copi.
+function listaTesto(acc){
+  const nome = (STORES.find(s => s[0] === state.store) || [,""])[1];
+  const meta = OFFERS_META[state.store];
+  const off  = state.store === "lidl" ? OFFERS_LIDL : (state.store === "rewe" ? OFFERS_REWE : {});
   const nDays = state.days.filter(Boolean).length;
   const dayNote = nDays === 7 ? "settimana intera" : state.days.map((v, i) => v ? DAYS_SHORT[i] : null).filter(Boolean).join(", ");
-  let out = "SPESA REWE — Ale + Lisa — " + wk.label + "\nGiorni: " + (dayNote || "nessuno") + "\n";
+  let out = `SPESA ${nome.toUpperCase()} — Ale + Lisa — ${wk.label}\nGiorni: ${dayNote || "nessuno"}\n`;
   let hasOffer = false;
   DEPTS.forEach(([dk, dn]) => {
-    const ids = Object.keys(acc).filter(id => IT[id].d === dk && dk !== "fuori").sort((x, y) => IT[x].n.localeCompare(IT[y].n, "it"));
+    const ids = Object.keys(acc)
+      .filter(id => IT[id].d === dk && storeOf(id) === state.store)
+      .sort((x, y) => IT[x].n.localeCompare(IT[y].n, "it"));
     if(!ids.length) return;
     out += "\n" + dn.toUpperCase() + "\n";
     ids.forEach(id => {
-      const q = acc[id], off = OFFERS_REWE[id];
-      if(off) hasOffer = true;
-      out += `[ ] ${IT[id].n} — ${fmtG(q.a + q.l)}${IT[id].de ? " (" + IT[id].de + ")" : ""}${off ? "  🏷️ " + off.t : ""}\n`;
+      const q = acc[id], o = off[id];
+      if(o) hasOffer = true;
+      out += `[ ] ${IT[id].n} — ${fmtG(q.a + q.l)}${IT[id].de ? " (" + IT[id].de + ")" : ""}${o ? "  🏷️ " + o.t : ""}\n`;
     });
   });
-  if(hasOffer) out += `\n🏷️ = in offerta REWE ${OFFERS_META.rewe.kw} (valida ${OFFERS_META.rewe.dates})\n`;
+  if(hasOffer && meta) out += `\n🏷️ = in offerta ${nome} ${meta.kw} (valida ${meta.dates})\n`;
+  return out;
+}
+
+document.getElementById("btn-copy").onclick = async () => {
+  const out = listaTesto(computeList());
   try{
     await navigator.clipboard.writeText(out);
     const b = document.getElementById("btn-copy");
