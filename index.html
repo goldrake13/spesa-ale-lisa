@@ -631,16 +631,39 @@ const W = [
 
 // ---------- stato ----------
 const LSKEY = "spesa-ale-lisa-v2";
-let state = {sel:{}, chk:{}, week:"", days:null};
+let state = {sel:{}, chk:{}, week:"", days:null, mv:{}, store:"lidl"};
 try{ const s = JSON.parse(localStorage.getItem(LSKEY)); if(s && s.sel) state = s; }catch(e){}
 if(!Array.isArray(state.days) || state.days.length !== 7) state.days = [true,true,true,true,true,true,true];
+if(!state.mv || typeof state.mv !== "object") state.mv = {};
+if(!STORE_KEYS.has(state.store)) state.store = "lidl";
 
 function save(){ try{ localStorage.setItem(LSKEY, JSON.stringify(state)); }catch(e){} syncHash(); }
 
+// In che negozio si compra una voce: l'override manuale se è valido, altrimenti il catalogo.
+// Le voci "no" (bar, pizzeria) non sono spostabili, qualunque cosa dica mv.
+function storeOf(id){
+  if(!IT[id] || IT[id].s === "no") return "no";
+  const s = state.mv[id];
+  return STORE_KEYS.has(s) ? s : (IT[id].s || "rewe");
+}
+
+// Stessa regola difensiva di selIndex: un codice salvato prima di un aggiornamento del
+// catalogo può citare voci o negozi che non esistono più → si scartano, si torna al default.
+function sanitizeMv(m){
+  const out = {};
+  if(m && typeof m === "object"){
+    Object.keys(m).forEach(id => {
+      if(Object.prototype.hasOwnProperty.call(IT, id) && IT[id].s !== "no" && STORE_KEYS.has(m[id])) out[id] = m[id];
+    });
+  }
+  return out;
+}
+
 // ---------- salvataggio robusto: codice esportabile + URL (per sandbox mobile) ----------
+// state.store resta fuori dal payload: è dove sei tu adesso, non una scelta da passare a Lisa.
 function encodeState(){
   try{
-    var payload = {s:state.sel, c:state.chk, d:state.days, w:state.week};
+    var payload = {s:state.sel, c:state.chk, d:state.days, w:state.week, m:state.mv};
     return btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
   }catch(e){ return ""; }
 }
@@ -650,6 +673,7 @@ function applyState(code){
     if(payload && payload.s){
       state.sel = payload.s || {};
       state.chk = payload.c || {};
+      state.mv  = sanitizeMv(payload.m);   // codice vecchio senza m → {}
       if(Array.isArray(payload.d) && payload.d.length === 7) state.days = payload.d;
       if(payload.w) state.week = payload.w;
       return true;
