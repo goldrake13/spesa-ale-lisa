@@ -1,7 +1,7 @@
 {
   "name": "La spesa del sabato — Ale + Lisa",
   "short_name": "Spesa",
-  "description": "Piano di spesa settimanale combinato per il REWE di Hamburg-Nord",
+  "description": "Piano di spesa settimanale combinato per Lidl e REWE a Hamburg-Nord",
   "lang": "it",
   "start_url": "./",
   "scope": "./",

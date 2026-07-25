@@ -280,7 +280,7 @@ const IT = {
   parm_dop:{n:"Parmigiano Reggiano DOP (pezzo)",de:"Parmigiano Reggiano am Stück",d:"frigo",s:"rewe"},
   parm_gratt:{n:"Parmigiano grattugiato",de:"geriebener Parmesan",d:"frigo",s:"rewe",sc:1},
   uova:{n:"Uova",de:"Eier",d:"frigo",s:"rewe",h:"60 g ≈ 1 uovo grande a testa"},
-  tofu:{n:"Tofu affumicato",de:"Räuchertofu (Taifun / REWE Bio)",d:"frigo",s:"lidl",h:"Vemondo è di Lidl — al REWE prendi Taifun o REWE Bio"},
+  tofu:{n:"Tofu affumicato",de:"Räuchertofu (Taifun / REWE Bio)",d:"frigo",s:"lidl",h:"qui è il Vemondo di Lidl — se lo prendi al REWE scegli Taifun o REWE Bio"},
   pasta_uovo_fresca:{n:"Pasta all'uovo fresca",de:"frische Eiernudeln (Kühlregal)",d:"frigo",s:"rewe"},
   riso_venere:{n:"Riso Venere",de:"schwarzer Reis",d:"dispensa",s:"rewe",sc:1},
   basmati:{n:"Riso Basmati",de:"Basmatireis",d:"dispensa",s:"rewe",sc:1},
@@ -680,7 +680,7 @@ function save(){ try{ localStorage.setItem(LSKEY, JSON.stringify(state)); }catch
 function storeOf(id){
   if(!IT[id] || IT[id].s === "no") return "no";
   const s = state.mv[id];
-  return STORE_KEYS.has(s) ? s : (IT[id].s || "rewe");
+  return STORE_KEYS.has(s) ? s : (STORE_KEYS.has(IT[id].s) ? IT[id].s : "rewe");
 }
 
 // Stessa regola difensiva di selIndex: un codice salvato prima di un aggiornamento del
@@ -812,7 +812,7 @@ function renderMenu(){
           const it = IT[e[1]];
           const off = offertaMenu(e[1]);
           const row = document.createElement("div");
-          row.className = it.d === "fuori" ? "outrow" : "fixrow";
+          row.className = it.s === "no" ? "outrow" : "fixrow";
           const who = [];
           if(e[2]) who.push("A " + e[2]);
           if(e[3]) who.push("L " + e[3]);
@@ -892,7 +892,8 @@ function renderOffersNote(){
   if(!meta){ el.classList.add("hidden"); return; }
   el.classList.remove("hidden");
   const nome = (STORES.find(s => s[0] === state.store) || [,""])[1];
-  el.innerHTML = `🏷️ <b>Offerte ${nome} ${meta.kw}</b> (valide ${meta.dates}): il tag verde segnala le voci in promozione, quello arancione i "Knaller". In grigio, quando c'è, l'offerta dell'altro negozio: serve a capire perché una voce sta di qua e non di là.`;
+  const top = state.store === "rewe" ? `i "Knaller"` : "i migliori affari";
+  el.innerHTML = `🏷️ <b>Offerte ${nome} ${meta.kw}</b> (valide ${meta.dates}): il tag verde segnala le voci in promozione, quello arancione ${top}. In grigio, quando c'è, l'offerta dell'altro negozio: serve a capire perché una voce sta di qua e non di là.`;
 }
 
 function itemRow(id, q, off, altOff, altNome, altK){
