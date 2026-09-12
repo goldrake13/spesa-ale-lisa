@@ -195,6 +195,7 @@ footer p{margin:6px 0}
   <span class="dflabel">Selezioni:</span>
   <button class="btn mini" id="btn-save">💾 Salva codice</button>
   <button class="btn mini" id="btn-restore">📂 Ripristina</button>
+  <button class="btn mini hidden" id="btn-reset-mv" title="Rimette ogni voce nel supermercato di partenza">↺ Negozi di default</button>
   <span class="savehint" id="savehint">Salva un codice per non perdere le scelte se la pagina si ricarica — e per passarle a Lisa.</span>
   <div class="saverow hidden" id="saverow">
     <textarea id="code-input" rows="2" placeholder="Incolla qui il codice e premi Applica…" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"></textarea>
@@ -954,6 +955,8 @@ function renderList(){
   root.innerHTML = "";
   renderStorePicker(storeCounts(acc));
   renderOffersNote();
+  // Il pulsante di reset compare solo se c'è qualcosa da resettare: a mv vuoto non servirebbe.
+  document.getElementById("btn-reset-mv").classList.toggle("hidden", !haSpostamenti());
   const nDays = state.days.filter(Boolean).length;
   if(nDays === 0){
     root.innerHTML = `<div class="empty">Nessun giorno selezionato.<br>Scegli i giorni della spesa qui sopra.</div>`;
@@ -1015,6 +1018,25 @@ function undoMove(id, from){
   save();
   renderList();
 }
+// I negozi di default stanno nel catalogo (IT[...].s), ma gli spostamenti manuali vivono nel
+// localStorage del telefono e sopravvivono agli aggiornamenti dell'app: senza questo reset non
+// c'è modo di tornare allo smistamento originale se non rispostando una voce alla volta.
+function haSpostamenti(){ return Object.keys(state.mv).length > 0; }
+function resetMv(){
+  const prev = {};
+  Object.keys(state.mv).forEach(id => { prev[id] = state.mv[id]; });
+  state.mv = {};
+  save();
+  renderList();
+  return prev;
+}
+// L'annulla ripassa da sanitizeMv come farebbe un codice ripristinato: se nel frattempo una voce
+// è sparita dal catalogo, non deve rientrare da qui.
+function undoReset(prev){
+  state.mv = sanitizeMv(prev);
+  save();
+  renderList();
+}
 // La voce sparisce dalla lista corrente: senza un messaggio, un tocco a vuoto sembra
 // aver cancellato qualcosa. Il testo vive nella barra del progresso, che il prossimo
 // renderList riscrive comunque.
@@ -1025,6 +1047,15 @@ function flashMove(id, from, to){
   prog.innerHTML = `${IT[id].n} → ${nome} · <button class="linkbtn" id="mv-undo">Annulla</button>`;
   const u = document.getElementById("mv-undo");
   if(u) u.onclick = ev => { ev.preventDefault(); ev.stopPropagation(); undoMove(id, from); };
+  if(moveTimer) clearTimeout(moveTimer);
+  moveTimer = setTimeout(() => renderList(), 6000);
+}
+function flashReset(prev){
+  const n = Object.keys(prev).length;
+  const prog = document.getElementById("prog");
+  prog.innerHTML = `${n} ${n === 1 ? "voce rimessa" : "voci rimesse"} nel negozio di partenza · <button class="linkbtn" id="mv-undo-all">Annulla</button>`;
+  const u = document.getElementById("mv-undo-all");
+  if(u) u.onclick = ev => { ev.preventDefault(); ev.stopPropagation(); undoReset(prev); };
   if(moveTimer) clearTimeout(moveTimer);
   moveTimer = setTimeout(() => renderList(), 6000);
 }
@@ -1080,6 +1111,10 @@ document.getElementById("code-copy").onclick = async () => {
   setHint(ok ? "Copiato ✓" : "Seleziona il testo e copialo a mano", ok, !ok);
 };
 document.getElementById("code-close").onclick = () => { closeCodeBox(); setHint("", false); };
+document.getElementById("btn-reset-mv").onclick = () => {
+  if(!haSpostamenti()) return;
+  flashReset(resetMv());
+};
 document.getElementById("days-all").onclick = () => { state.days = [true,true,true,true,true,true,true]; save(); renderAll(); };
 document.getElementById("days-none").onclick = () => { state.days = [false,false,false,false,false,false,false]; save(); renderAll(); };
 document.getElementById("btn-uncheck").onclick = () => {
